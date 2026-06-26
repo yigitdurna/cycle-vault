@@ -209,6 +209,7 @@ export default function App() {
               hideFertility={hideFertility}
               activeCycle={activeCycle}
               onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
+              nextPeriod={nextPeriod}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}

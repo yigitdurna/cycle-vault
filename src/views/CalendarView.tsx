@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { X } from 'lucide-react';
+import { X, Droplets } from 'lucide-react';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { SymptomPills } from '../components/SymptomPills';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
@@ -15,6 +15,7 @@ interface CalendarViewProps {
   hideFertility?: boolean;
   activeCycle: Cycle | null;
   onEndCycle: () => void;
+  nextPeriod: { date: string; daysToNext: number } | null;
   /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
@@ -24,7 +25,7 @@ interface CalendarViewProps {
 
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle,
+  activeCycle, onEndCycle, nextPeriod,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const selecting = selectionStart !== null;
@@ -36,9 +37,25 @@ export function CalendarView({
       exit={{ opacity: 0, x: -20 }}
       className="space-y-5"
     >
-      {/* Active period bar (only while a period is ongoing) */}
+      {/* Active period bar while a period is ongoing; otherwise a countdown
+          to the next predicted period. */}
       {!selecting && activeCycle && (
         <ActivePeriodBanner activeCycle={activeCycle} onEndCycle={onEndCycle} />
+      )}
+      {!selecting && !activeCycle && nextPeriod && (
+        <div className="glass rounded-[2rem] p-4 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-menstrual/15 flex items-center justify-center shrink-0">
+            <Droplets size={18} className="text-menstrual" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold">
+              {nextPeriod.daysToNext === 0
+                ? 'Period expected today'
+                : `Next period in ${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'day' : 'days'}`}
+            </div>
+            <div className="text-xs text-ink/55 mt-0.5">Around {niceShort(nextPeriod.date)}</div>
+          </div>
+        </div>
       )}
 
       {/* End-date selection banner */}
