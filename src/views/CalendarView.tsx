@@ -126,7 +126,7 @@ export function CalendarView({
       {!selecting && (
         <>
           {/* Legend */}
-          <div className="glass rounded-3xl p-4 flex flex-wrap gap-x-5 gap-y-2.5">
+          <div className="glass rounded-3xl p-4 flex flex-wrap justify-center gap-x-5 gap-y-2.5">
             <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 rounded-full bg-menstrual" />
               <span className="text-xs font-medium text-ink/70">Period</span>
