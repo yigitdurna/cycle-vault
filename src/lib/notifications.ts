@@ -148,7 +148,9 @@ export function planNotifications(
         id: TYPE_BASE.periodEndConfirm,
         copyKey: 'endConfirm',
         args: { day: settings.endReminderDay },
-        at: atTime(addDays(fromYmd(active.start), settings.endReminderDay), settings.reminderTime),
+        // Cycle day 1 is the start (offset 0), so day N is offset N-1. This
+        // makes the fire date match the "It's been {day} days" copy.
+        at: atTime(addDays(fromYmd(active.start), settings.endReminderDay - 1), settings.reminderTime),
       });
     }
   }

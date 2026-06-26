@@ -64,10 +64,10 @@ describe('planNotifications', () => {
     const plan = planNotifications(S({ endReminderDay: 7 }), active, false, 28, now);
     const end = plan.find(p => p.copyKey === 'endConfirm');
     expect(end).toBeTruthy();
-    // 2026-06-18 + 7 days = 2026-06-25
+    // endReminderDay 7 → cycle day 7 = start + 6 days = 2026-06-24
     expect(end!.at.getFullYear()).toBe(2026);
     expect(end!.at.getMonth()).toBe(5);
-    expect(end!.at.getDate()).toBe(25);
+    expect(end!.at.getDate()).toBe(24);
   });
 
   it('attaches the Yes/No action type to the start-confirm notification', () => {
