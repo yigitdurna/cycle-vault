@@ -407,22 +407,47 @@ describe('getNextPeriodDate', () => {
     const cycles: Cycle[] = [{ start: '2026-01-01', end: '2026-01-05' }];
     const result = getNextPeriodDate(cycles);
     expect(result).not.toBeNull();
-    // anchorStart='2026-01-01', daysSince=14, cyclesPassed=0, next = 0+1 = 1 cycle
-    // nextStart = Jan1 + 28 = Jan29
+    // anchorStart='2026-01-01', next = anchor + median (28) = Jan29
     expect(result!.date).toBe('2026-01-29');
     expect(result!.daysToNext).toBe(14);
   });
 
-  it('advances the cycle count when today is past the median', () => {
+  it('surfaces an overdue period when today is past the expected start', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 1, 10, 12, 0, 0)); // Feb 10
     const cycles: Cycle[] = [{ start: '2026-01-01', end: '2026-01-05' }];
     const result = getNextPeriodDate(cycles);
     expect(result).not.toBeNull();
-    // daysSince = diff('2026-02-10', '2026-01-01') = 40
-    // cyclesPassed = floor(40/28) = 1, nextCycleNum = 2
-    // nextStart = Jan1 + 56 = Feb26
-    expect(result!.date).toBe('2026-02-26');
+    // No newer cycle logged → the first expected period (Jan1 + 28 = Jan29)
+    // is in the past, so it is reported as overdue (negative daysToNext)
+    // rather than skipped to a future cycle.
+    expect(result!.date).toBe('2026-01-29');
+    // diff('2026-01-29', '2026-02-10') = -12
+    expect(result!.daysToNext).toBe(-12);
+  });
+
+  it('reports zero days when the expected start is today', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 29, 12, 0, 0)); // Jan 29
+    const cycles: Cycle[] = [{ start: '2026-01-01', end: '2026-01-05' }];
+    const result = getNextPeriodDate(cycles);
+    expect(result).not.toBeNull();
+    expect(result!.date).toBe('2026-01-29');
+    expect(result!.daysToNext).toBe(0);
+  });
+
+  it('returns null once an actual later cycle supersedes the prediction', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 1, 10, 12, 0, 0)); // Feb 10
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: '2026-01-05' },
+      { start: '2026-02-01', end: '2026-02-05' },
+    ];
+    // anchor = 2026-02-01 (latest <= today); no start > anchor, so it predicts
+    // from there. Median = the Jan1→Feb1 gap = 31 days → Feb1 + 31 = Mar4.
+    const result = getNextPeriodDate(cycles);
+    expect(result).not.toBeNull();
+    expect(result!.date).toBe('2026-03-04');
   });
 });
 

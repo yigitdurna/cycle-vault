@@ -70,7 +70,9 @@ export function CalendarView({
           <ProgressRing progress={cycleProgress} />
           <div>
             <p className="text-sm font-semibold">
-              {nextPeriod.daysToNext === 0
+              {nextPeriod.daysToNext < 0
+                ? `Period overdue by ${-nextPeriod.daysToNext} ${nextPeriod.daysToNext === -1 ? 'day' : 'days'}`
+                : nextPeriod.daysToNext === 0
                 ? 'Period expected today'
                 : `Next period in ${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'day' : 'days'}`}
             </p>

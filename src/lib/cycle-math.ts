@@ -193,16 +193,16 @@ export function getNextPeriodDate(cycles: Cycle[], fallback = 28): { date: strin
 
   if (!anchorStart) return null;
 
-  // Calculate how many full cycles have passed since anchor
-  const daysSinceAnchor = diff(todayYmd, anchorStart);
-  const cyclesPassed = Math.floor(daysSinceAnchor / stats.med);
-  const nextCycleNum = cyclesPassed + 1;
+  // The first period predicted after the most recent recorded cycle start:
+  // anchorStart + one median cycle. We intentionally do NOT skip ahead past
+  // missed periods — if today is past this date and no newer cycle has been
+  // logged, the period is overdue and we surface that (negative daysToNext)
+  // rather than hiding it behind a future prediction.
+  const nextStart = ymd(addDays(fromYmd(anchorStart), stats.med));
 
-  // Always use the actual next cycle number so prediction stays ahead of today,
-  // even for long/irregular cycles where median > 45 days.
-  const nextStart = ymd(addDays(fromYmd(anchorStart), nextCycleNum * stats.med));
-
-  if (nextStart <= todayYmd) return null;
+  // If the user has already logged an actual cycle starting after the anchor,
+  // this prediction has been superseded — don't show a stale overdue period.
+  if (stats.starts.some(s => s > anchorStart)) return null;
 
   const daysToNext = diff(nextStart, todayYmd);
   return { date: nextStart, daysToNext };
