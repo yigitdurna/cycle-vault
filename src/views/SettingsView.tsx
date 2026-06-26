@@ -1,9 +1,38 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Upload, Trash2, FileJson, FileSpreadsheet, Shield, Share2, RefreshCw, Check, FileText, ExternalLink } from 'lucide-react';
+import { Download, Upload, Trash2, FileJson, FileSpreadsheet, Shield, Share2, RefreshCw, Check, FileText, ExternalLink, Bell } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { cn } from '../lib/utils';
-import type { Cycle } from '../types';
+import { requestNotificationPermission } from '../lib/notifications';
+import type { Cycle, NotificationSettings, LeadDay } from '../types';
+
+const LEAD_DAY_OPTIONS: LeadDay[] = [1, 2, 3, 5, 7];
+
+/** Small reusable on/off switch. */
+function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      onClick={() => onChange(!checked)}
+      className={cn('relative w-12 h-7 rounded-full shrink-0 transition-colors', checked ? 'bg-accent' : 'bg-ink/15')}
+    >
+      <span className={cn('absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform', checked && 'translate-x-5')} />
+    </button>
+  );
+}
+
+/** A labelled settings row with a trailing toggle. */
+function Row({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="text-sm font-medium">{label}</div>
+      <Toggle checked={checked} onChange={onChange} label={label} />
+    </div>
+  );
+}
 
 interface SettingsViewProps {
   cycles: Cycle[];
@@ -18,9 +47,13 @@ interface SettingsViewProps {
   computedCycleLength: number | undefined;
   hideFertility: boolean;
   onSetHideFertility: (v: boolean) => void;
+  /** True if there is any data at all (cycles OR symptom logs). */
+  hasData: boolean;
+  notifications: NotificationSettings;
+  onSetNotifications: (patch: Partial<NotificationSettings>) => void;
 }
 
-export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength, hideFertility, onSetHideFertility }: SettingsViewProps) {
+export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength, hideFertility, onSetHideFertility, hasData, notifications, onSetNotifications }: SettingsViewProps) {
   const [clearConfirm, setClearConfirm] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -51,6 +84,29 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
     clearTimeout(cycleSavedTimer.current);
     cycleSavedTimer.current = setTimeout(() => setCycleSaved(false), 2000);
   }, [cycleLengthInput, onSetCycleLength]);
+
+  // Reminder time — local string, commit on blur (project convention).
+  const [timeInput, setTimeInput] = useState(notifications.reminderTime);
+  useEffect(() => { setTimeInput(notifications.reminderTime); }, [notifications.reminderTime]);
+  const [notifMsg, setNotifMsg] = useState<string | null>(null);
+
+  const handleEnableNotifications = async (on: boolean) => {
+    if (!on) { onSetNotifications({ enabled: false }); return; }
+    const granted = await requestNotificationPermission();
+    if (granted) {
+      onSetNotifications({ enabled: true });
+      setNotifMsg(null);
+    } else {
+      setNotifMsg('Reminders need the installed app with notifications allowed (iOS Settings → cycle vault → Notifications).');
+    }
+  };
+
+  const toggleLeadDay = (d: LeadDay) => {
+    const next = notifications.leadDays.includes(d)
+      ? notifications.leadDays.filter(x => x !== d)
+      : [...notifications.leadDays, d].sort((a, b) => a - b);
+    onSetNotifications({ leadDays: next });
+  };
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -185,6 +241,75 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         </div>
       </div>
 
+      {/* Notifications */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Reminders</h3>
+        <div className="glass rounded-3xl p-5 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-sm font-medium flex items-center gap-2"><Bell size={15} /> Notifications</div>
+              <div className="text-xs text-ink/60 mt-0.5">On-device reminders. Nothing leaves your phone.</div>
+            </div>
+            <Toggle checked={notifications.enabled} onChange={handleEnableNotifications} label="Enable notifications" />
+          </div>
+
+          {notifMsg && <p className="text-xs text-menstrual">{notifMsg}</p>}
+
+          {notifications.enabled && (
+            <div className="space-y-4 pt-1">
+              {/* Reminder time */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-sm font-medium">Reminder time</div>
+                <input
+                  type="time"
+                  value={timeInput}
+                  onChange={e => setTimeInput(e.target.value)}
+                  onBlur={() => onSetNotifications({ reminderTime: timeInput || '09:00' })}
+                  className="bg-ink/[0.05] border border-ink/[0.08] rounded-xl px-2 py-1.5 text-sm text-ink/80 focus:outline-none focus:border-accent/40"
+                />
+              </div>
+
+              {/* Upcoming period + lead days */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="text-sm font-medium">Upcoming period</div>
+                <Toggle checked={notifications.upcomingPeriod} onChange={v => onSetNotifications({ upcomingPeriod: v })} label="Upcoming period reminder" />
+              </div>
+              {notifications.upcomingPeriod && (
+                <div className="flex flex-wrap gap-2">
+                  {LEAD_DAY_OPTIONS.map(d => {
+                    const on = notifications.leadDays.includes(d);
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => toggleLeadDay(d)}
+                        className={cn(
+                          'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                          on ? 'bg-accent text-white border-accent' : 'bg-ink/[0.05] text-ink/60 border-ink/[0.08]',
+                        )}
+                      >
+                        {d}d before
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Per-type toggles */}
+              <Row label="Period start day" checked={notifications.periodStartDay} onChange={v => onSetNotifications({ periodStartDay: v })} />
+              <Row label="Did your period start?" checked={notifications.periodStartConfirm} onChange={v => onSetNotifications({ periodStartConfirm: v })} />
+              <Row label="Did your period end?" checked={notifications.periodEndConfirm} onChange={v => onSetNotifications({ periodEndConfirm: v })} />
+              {!hideFertility && (
+                <>
+                  <Row label="Ovulation day" checked={notifications.ovulation} onChange={v => onSetNotifications({ ovulation: v })} />
+                  <Row label="Fertile window start" checked={notifications.fertileWindow} onChange={v => onSetNotifications({ fertileWindow: v })} />
+                </>
+              )}
+              <Row label="Phase wellness tips" checked={notifications.wellnessTips} onChange={v => onSetNotifications({ wellnessTips: v })} />
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Data Info */}
       <div className="glass rounded-3xl p-5">
         <div className="text-xs text-ink/55 uppercase tracking-wider font-medium">Data</div>
@@ -197,7 +322,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Export</h3>
         <button
           onClick={onExportJSON}
-          disabled={!cycles.length}
+          disabled={!hasData}
           className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors disabled:opacity-30"
         >
           <FileJson size={20} className="text-ink/60" />
@@ -209,7 +334,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         </button>
         <button
           onClick={onExportCSV}
-          disabled={!cycles.length}
+          disabled={!hasData}
           className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors disabled:opacity-30"
         >
           <FileSpreadsheet size={20} className="text-ink/60" />
@@ -302,7 +427,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         <h3 className="text-sm font-semibold uppercase tracking-wider text-menstrual px-1">Danger Zone</h3>
         <button
           onClick={() => setClearConfirm(true)}
-          disabled={!cycles.length}
+          disabled={!hasData}
           className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-menstrual/10 transition-colors disabled:opacity-30 border-menstrual/20"
         >
           <Trash2 size={20} className="text-menstrual" />

@@ -140,3 +140,42 @@ export interface Insight {
   phase?: CyclePhase;
   confidence: number;
 }
+
+// --- Notification settings ---
+
+/** Days-before-period options the user may multi-select. */
+export type LeadDay = 1 | 2 | 3 | 5 | 7;
+
+export interface NotificationSettings {
+  /** Master switch. If false, no notifications are scheduled. */
+  enabled: boolean;
+  /** "HH:MM" 24h local time all reminders fire at. */
+  reminderTime: string;
+  // per-type enable flags
+  upcomingPeriod: boolean;
+  periodStartDay: boolean;
+  periodStartConfirm: boolean;
+  periodEndConfirm: boolean;
+  ovulation: boolean;
+  fertileWindow: boolean;
+  wellnessTips: boolean;
+  // parameters
+  /** Lead times (days before predicted start) for the upcoming-period reminder. */
+  leadDays: LeadDay[];
+  /** Day-of-cycle the "did it end?" reminder fires. */
+  endReminderDay: number;
+}
+
+export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  enabled: false, // opt-in: off until the user enables + grants permission
+  reminderTime: '09:00',
+  upcomingPeriod: true,
+  periodStartDay: true,
+  periodStartConfirm: true,
+  periodEndConfirm: true,
+  ovulation: false, // off so the default install is fertility-neutral
+  fertileWindow: false,
+  wellnessTips: false,
+  leadDays: [2],
+  endReminderDay: 7,
+};
