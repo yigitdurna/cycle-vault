@@ -29,14 +29,20 @@ if (!API_KEY) {
 const FILES = [
   'package.json',
   'vite.config.ts',
-  'README.md',
+  'capacitor.config.ts',
   '.github/workflows/deploy.yml',
+  'src/index.css',
   'src/types.ts',
   'src/App.tsx',
   'src/lib/cycle-math.ts',
   'src/lib/insights.ts',
   'src/hooks/useCycles.ts',
   'src/hooks/useDayLogs.ts',
+  'src/hooks/useSettings.ts',
+  'src/views/CalendarView.tsx',
+  'src/components/CalendarGrid.tsx',
+  'src/components/DayDetailSheet.tsx',
+  'src/views/SettingsView.tsx',
 ];
 
 const MAX_BYTES_PER_FILE = 24_000;
