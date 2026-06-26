@@ -19,12 +19,18 @@
   "scripts": {
     "dev": "vite --port=3000",
     "build": "vite build",
+    "build:ios": "CAP_BUILD=1 vite build",
+    "ios:sync": "CAP_BUILD=1 vite build && cap sync ios",
+    "ios:open": "cap open ios",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@capacitor/cli": "8.4.1",
+    "@capacitor/core": "8.4.1",
+    "@capacitor/ios": "8.4.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.546.0",
