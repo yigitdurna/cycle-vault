@@ -14,7 +14,11 @@ function loadLogs(): DayLogs {
 }
 
 function saveLogs(logs: DayLogs) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+  } catch (e) {
+    console.warn('Failed to persist day logs to localStorage', e);
+  }
 }
 
 export function useDayLogs() {

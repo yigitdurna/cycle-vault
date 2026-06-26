@@ -90,7 +90,11 @@ function loadCycles(): Cycle[] {
 }
 
 function saveCycles(cycles: Cycle[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cycles));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cycles));
+  } catch (e) {
+    console.warn('Failed to persist cycles to localStorage', e);
+  }
 }
 
 export function useCycles(defaultCycleLength = 28, hideFertility = false) {
