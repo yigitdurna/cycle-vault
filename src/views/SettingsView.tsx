@@ -76,7 +76,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
           <Shield size={20} className="text-emerald-400/70 mt-0.5 shrink-0" />
           <div>
             <div className="font-semibold text-sm">Your data is private</div>
-            <p className="text-xs text-white/40 mt-1">
+            <p className="text-xs text-ink/55 mt-1">
               Everything stays on your device. No accounts, no cloud, no tracking. We never see your data.
             </p>
           </div>
@@ -85,12 +85,12 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
 
       {/* Cycle Length */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Cycle</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Cycle</h3>
         <div className="glass rounded-3xl p-5 space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
               <div className="text-sm font-medium">Average cycle length</div>
-              <div className="text-xs text-white/40 mt-0.5">
+              <div className="text-xs text-ink/55 mt-0.5">
                 {computedCycleLength
                   ? `Computed from your data: ${computedCycleLength} days`
                   : 'Used until enough cycles are logged'}
@@ -105,9 +105,9 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                 onChange={e => setCycleLengthInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && saveCycleLength()}
                 placeholder="28"
-                className="w-16 bg-white/5 border border-white/10 rounded-xl px-2 py-1.5 text-sm text-center text-white/80 focus:outline-none focus:border-accent/40"
+                className="w-16 bg-ink/[0.05] border border-ink/[0.08] rounded-xl px-2 py-1.5 text-sm text-center text-ink/80 focus:outline-none focus:border-accent/40"
               />
-              <span className="text-xs text-white/40">days</span>
+              <span className="text-xs text-ink/55">days</span>
             </div>
           </div>
 
@@ -134,14 +134,14 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.2 }}
                   onClick={saveCycleLength}
-                  className="px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-xs font-medium text-white hover:bg-accent/30 transition-colors"
+                  className="px-4 py-1.5 rounded-full bg-accent/20 border border-accent/40 text-xs font-medium text-ink hover:bg-accent/30 transition-colors"
                 >
                   Save
                 </motion.button>
               ) : customCycleLength ? (
                 <button
                   onClick={() => { onSetCycleLength(undefined); setCycleLengthInput(''); }}
-                  className="flex items-center gap-1.5 text-xs text-white/30 hover:text-white/60 transition-colors"
+                  className="flex items-center gap-1.5 text-xs text-ink/45 hover:text-ink/65 transition-colors"
                 >
                   <RefreshCw size={12} />
                   Reset to default (28)
@@ -154,12 +154,12 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
 
       {/* Tracking preferences */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Tracking</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Tracking</h3>
         <div className="glass rounded-3xl p-5">
           <label className="flex items-center justify-between gap-4 cursor-pointer">
             <div>
               <div className="text-sm font-medium">Hide fertility &amp; ovulation</div>
-              <div className="text-xs text-white/55 mt-0.5">
+              <div className="text-xs text-ink/60 mt-0.5">
                 For when you&apos;re not trying to conceive — removes fertile-window and ovulation predictions everywhere.
               </div>
             </div>
@@ -171,7 +171,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
               onClick={() => onSetHideFertility(!hideFertility)}
               className={cn(
                 'relative w-12 h-7 rounded-full shrink-0 transition-colors',
-                hideFertility ? 'bg-accent/70' : 'bg-white/15',
+                hideFertility ? 'bg-accent' : 'bg-ink/15',
               )}
             >
               <span
@@ -187,43 +187,43 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
 
       {/* Data Info */}
       <div className="glass rounded-3xl p-5">
-        <div className="text-xs text-white/40 uppercase tracking-wider font-medium">Data</div>
+        <div className="text-xs text-ink/55 uppercase tracking-wider font-medium">Data</div>
         <div className="text-lg font-semibold mt-1">{cycles.length} cycle{cycles.length !== 1 ? 's' : ''} logged</div>
-        <p className="text-xs text-white/30 mt-1">All data stored locally on this device</p>
+        <p className="text-xs text-ink/45 mt-1">All data stored locally on this device</p>
       </div>
 
       {/* Export */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Export</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Export</h3>
         <button
           onClick={onExportJSON}
           disabled={!cycles.length}
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors disabled:opacity-30"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors disabled:opacity-30"
         >
-          <FileJson size={20} className="text-white/50" />
+          <FileJson size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Export as JSON</div>
-            <div className="text-xs text-white/40">Full backup — includes symptoms, notes &amp; history</div>
+            <div className="text-xs text-ink/55">Full backup — includes symptoms, notes &amp; history</div>
           </div>
-          <Download size={16} className="text-white/30 ml-auto" />
+          <Download size={16} className="text-ink/45 ml-auto" />
         </button>
         <button
           onClick={onExportCSV}
           disabled={!cycles.length}
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors disabled:opacity-30"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors disabled:opacity-30"
         >
-          <FileSpreadsheet size={20} className="text-white/50" />
+          <FileSpreadsheet size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Export as CSV</div>
-            <div className="text-xs text-white/40">Symptoms, notes &amp; cycle dates — opens in Excel</div>
+            <div className="text-xs text-ink/55">Symptoms, notes &amp; cycle dates — opens in Excel</div>
           </div>
-          <Download size={16} className="text-white/30 ml-auto" />
+          <Download size={16} className="text-ink/45 ml-auto" />
         </button>
       </div>
 
       {/* Import */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Import</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Import</h3>
         <input
           ref={jsonInputRef}
           type="file"
@@ -240,12 +240,12 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         />
         <button
           onClick={() => jsonInputRef.current?.click()}
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors"
         >
-          <FileJson size={20} className="text-white/50" />
+          <FileJson size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Import JSON</div>
-            <div className="text-xs text-white/40">Restore from a backup file</div>
+            <div className="text-xs text-ink/55">Restore from a backup file</div>
           </div>
         </button>
         <input
@@ -257,12 +257,12 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors"
         >
-          <Upload size={20} className="text-white/50" />
+          <Upload size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Import CSV</div>
-            <div className="text-xs text-white/40">Add cycles from a CSV file</div>
+            <div className="text-xs text-ink/55">Add cycles from a CSV file</div>
           </div>
         </button>
         {importMsg && (
@@ -273,7 +273,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
       {/* Share Summary */}
       {shareSummary && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Share</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Share</h3>
           <button
             onClick={async () => {
               if (navigator.share) {
@@ -286,12 +286,12 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                 setTimeout(() => setImportMsg(null), 3000);
               }
             }}
-            className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+            className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors"
           >
-            <Share2 size={20} className="text-white/50" />
+            <Share2 size={20} className="text-ink/60" />
             <div className="text-left">
               <div className="text-sm font-medium">Share Summary</div>
-              <div className="text-xs text-white/40">Share current cycle status</div>
+              <div className="text-xs text-ink/55">Share current cycle status</div>
             </div>
           </button>
         </div>
@@ -299,53 +299,53 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
 
       {/* Danger Zone */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-menstrual/60 px-1">Danger Zone</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-menstrual px-1">Danger Zone</h3>
         <button
           onClick={() => setClearConfirm(true)}
           disabled={!cycles.length}
           className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-menstrual/10 transition-colors disabled:opacity-30 border-menstrual/20"
         >
-          <Trash2 size={20} className="text-menstrual/60" />
+          <Trash2 size={20} className="text-menstrual" />
           <div className="text-left">
-            <div className="text-sm font-medium text-menstrual/80">Clear All Data</div>
-            <div className="text-xs text-white/40">Permanently delete all cycles</div>
+            <div className="text-sm font-medium text-menstrual">Clear All Data</div>
+            <div className="text-xs text-ink/55">Permanently delete all cycles</div>
           </div>
         </button>
       </div>
 
       {/* Privacy & Legal */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Privacy &amp; Legal</h3>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-ink/55 px-1">Privacy &amp; Legal</h3>
         <a
           href={import.meta.env.BASE_URL + 'privacy.html'}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors"
         >
-          <Shield size={20} className="text-white/50" />
+          <Shield size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Privacy Policy</div>
-            <div className="text-xs text-white/55">How your data is handled (it never leaves your device)</div>
+            <div className="text-xs text-ink/60">How your data is handled (it never leaves your device)</div>
           </div>
-          <ExternalLink size={16} className="text-white/30 ml-auto" />
+          <ExternalLink size={16} className="text-ink/45 ml-auto" />
         </a>
         <a
           href={import.meta.env.BASE_URL + 'terms.html'}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-ink/[0.07] transition-colors"
         >
-          <FileText size={20} className="text-white/50" />
+          <FileText size={20} className="text-ink/60" />
           <div className="text-left">
             <div className="text-sm font-medium">Terms &amp; Medical Disclaimer</div>
-            <div className="text-xs text-white/55">Not medical advice; not for contraception</div>
+            <div className="text-xs text-ink/60">Not medical advice; not for contraception</div>
           </div>
-          <ExternalLink size={16} className="text-white/30 ml-auto" />
+          <ExternalLink size={16} className="text-ink/45 ml-auto" />
         </a>
       </div>
 
       {/* Version */}
-      <p className="text-center text-xs text-white/20 pt-4">cycle vault</p>
+      <p className="text-center text-xs text-ink/35 pt-4">cycle vault</p>
 
       <ConfirmDialog
         open={clearConfirm}

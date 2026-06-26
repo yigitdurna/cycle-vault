@@ -28,8 +28,8 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
 
       {sorted.length === 0 ? (
         <div className="glass rounded-[2rem] p-6 text-center">
-          <p className="text-white/50">No cycles logged yet</p>
-          <p className="text-white/30 text-sm mt-1">Use the + button to log your first period</p>
+          <p className="text-ink/60">No cycles logged yet</p>
+          <p className="text-ink/45 text-sm mt-1">Use the + button to log your first period</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -48,10 +48,10 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
                   <p className="font-semibold text-lg">
                     {month}
                     {isActive && (
-                      <span className="ml-2 text-xs font-normal text-menstrual/80">Ongoing</span>
+                      <span className="ml-2 text-xs font-normal text-menstrual">Ongoing</span>
                     )}
                   </p>
-                  <p className="text-xs text-white/40">
+                  <p className="text-xs text-ink/55">
                     Started {nice(cycle.start)}
                     {duration && ` · ${duration} days`}
                   </p>
@@ -59,15 +59,15 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => onEdit(cycle)}
-                    className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                    className="w-9 h-9 rounded-full bg-ink/[0.05] flex items-center justify-center hover:bg-ink/[0.07] transition-colors"
                   >
-                    <Pencil size={14} className="text-white/50" />
+                    <Pencil size={14} className="text-ink/60" />
                   </button>
                   <button
                     onClick={() => setDeleteTarget(cycle.start)}
-                    className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center hover:bg-menstrual/20 transition-colors"
+                    className="w-9 h-9 rounded-full bg-ink/[0.05] flex items-center justify-center hover:bg-menstrual/20 transition-colors"
                   >
-                    <Trash2 size={14} className="text-white/50" />
+                    <Trash2 size={14} className="text-ink/60" />
                   </button>
                 </div>
               </div>

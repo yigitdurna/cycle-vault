@@ -36,28 +36,28 @@ export const PHASES: Record<CyclePhase, PhaseInfo> = {
     color: 'var(--color-menstrual)',
     description: 'Your body is shedding the uterine lining. Focus on rest and gentle movement.',
     range: [1, 5],
-    gradient: 'from-rose-950/60 via-red-950/25 to-bg-warm',
+    gradient: 'from-rose-200/70 via-rose-100/40 to-bg',
   },
   Follicular: {
     name: 'Follicular',
     color: 'var(--color-follicular)',
     description: 'Estrogen levels are rising. You might feel more energetic and creative.',
     range: [6, 9],
-    gradient: 'from-emerald-950/50 via-green-950/20 to-bg-warm',
+    gradient: 'from-emerald-200/60 via-emerald-100/35 to-bg',
   },
   Ovulation: {
     name: 'Ovulation',
     color: 'var(--color-ovulation)',
     description: 'Estimated fertile window. Calendar-based estimates are approximate — not for medical use.',
     range: [10, 16],
-    gradient: 'from-yellow-950/50 via-amber-950/25 to-bg-warm',
+    gradient: 'from-amber-200/60 via-amber-100/35 to-bg',
   },
   Luteal: {
     name: 'Luteal',
     color: 'var(--color-luteal)',
     description: 'Progesterone rises. Focus on grounding activities and self-care.',
     range: [17, 28],
-    gradient: 'from-purple-950/50 via-rose-950/20 to-bg-warm',
+    gradient: 'from-purple-200/55 via-purple-100/30 to-bg',
   },
 };
 
