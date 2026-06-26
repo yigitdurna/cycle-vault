@@ -258,7 +258,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                     className="w-full py-3.5 rounded-2xl bg-menstrual text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                   >
                     <Play size={14} />
-                    Start period on this day
+                    Start a period here
                   </button>
                 )}
                 {canEndPeriod && (

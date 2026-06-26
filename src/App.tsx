@@ -25,8 +25,12 @@ export default function App() {
   // Day-detail sheet is owned here (not in CalendarView) so the bottom nav can
   // hide while it's open and day actions can reach the cycle CRUD methods.
   const [detailDate, setDetailDate] = useState<string | null>(null);
+  // When set, the calendar is in "pick the end date" mode for a new period
+  // whose start the user just chose. Guided start→end logging, no top button.
+  const [pendingStart, setPendingStart] = useState<string | null>(null);
 
   const handleTabChange = (tab: Tab) => {
+    setPendingStart(null); // cancel any in-progress period selection
     setActiveTab(tab);
   };
 
@@ -101,9 +105,19 @@ export default function App() {
 
   const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
 
-  const openLogSheet = () => {
-    setEditingCycle(null);
-    setLogSheetOpen(true);
+  // Guided period logging from the calendar: a date tapped as "start" enters
+  // end-selection mode; the next tap (>= start) commits both atomically. An
+  // earlier tap re-anchors the start; "still ongoing" leaves the end open.
+  const beginPeriodSelection = (start: string) => { setPendingStart(start); setDetailDate(null); };
+  const handleRangeSelect = (date: string) => {
+    if (!pendingStart) return;
+    if (date < pendingStart) { setPendingStart(date); return; }
+    addCycle(pendingStart, date);
+    setPendingStart(null);
+  };
+  const handleStillOngoing = () => {
+    if (pendingStart) addCycle(pendingStart, null);
+    setPendingStart(null);
   };
 
   const openEditSheet = (cycle: Cycle) => {
@@ -193,9 +207,12 @@ export default function App() {
               onDayTap={setDetailDate}
               todayLog={todayLog}
               onUpdateTodayLog={handleUpdateLog}
-              onLogPeriod={openLogSheet}
               hideFertility={hideFertility}
               customCycleLength={customCycleLength ?? 28}
+              selectionStart={pendingStart}
+              onRangeSelect={handleRangeSelect}
+              onStillOngoing={handleStillOngoing}
+              onCancelSelection={() => setPendingStart(null)}
             />
           )}
 
@@ -265,7 +282,7 @@ export default function App() {
         phaseColor={detailUIPhase.color}
         activeCycle={activeCycle}
         dateInRecordedPeriod={detailInRecordedPeriod}
-        onStartPeriod={(d) => { addCycle(d, null); setDetailDate(null); }}
+        onStartPeriod={beginPeriodSelection}
         onEndPeriod={(d) => { endCycle(d); setDetailDate(null); }}
         onUpdateLog={handleUpdateLogForDate}
         onClose={() => setDetailDate(null)}
