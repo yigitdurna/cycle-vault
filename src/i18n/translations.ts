@@ -111,6 +111,31 @@ export const translations = {
     },
     bannerStarted: { en: 'Started {date}', tr: '{date} tarihinde başladı', de: 'Begonnen am {date}' },
     bannerEnd: { en: 'End', tr: 'Bitir', de: 'Beenden' },
+
+    // Empty dashboard prompt (when no cycles logged)
+    headToCalendar: {
+      en: 'Head to the Calendar to log your first period.',
+      tr: 'İlk reglini kaydetmek için Takvim’e git.',
+      de: 'Geh zum Kalender, um deine erste Periode zu erfassen.',
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // Cycle history panel (CycleHistoryPanel)
+  // ---------------------------------------------------------------------------
+  historyStats: {
+    title: { en: 'Your cycle history', tr: 'Döngü geçmişin', de: 'Dein Zyklusverlauf' },
+    avgCycle: { en: 'Avg cycle', tr: 'Ort. döngü', de: 'Ø Zyklus' },
+    avgPeriod: { en: 'Avg period', tr: 'Ort. regl', de: 'Ø Periode' },
+    range: { en: 'Range', tr: 'Aralık', de: 'Spanne' },
+    recent: { en: 'Recent', tr: 'Son', de: 'Zuletzt' },
+    regular: { en: 'regular', tr: 'düzenli', de: 'regelmäßig' },
+    mostlyRegular: { en: 'mostly regular', tr: 'çoğunlukla düzenli', de: 'meist regelmäßig' },
+    irregular: { en: 'irregular', tr: 'düzensiz', de: 'unregelmäßig' },
+    dayCycle: { en: '{count}-day cycle', tr: '{count} günlük döngü', de: '{count}-Tage-Zyklus' },
+    current: { en: 'current', tr: 'şu an', de: 'aktuell' },
+    cyclesTrackedOne: { en: '{count} cycle tracked', tr: '{count} döngü takip edildi', de: '{count} Zyklus erfasst' },
+    cyclesTrackedOther: { en: '{count} cycles tracked', tr: '{count} döngü takip edildi', de: '{count} Zyklen erfasst' },
   },
 
   // ---------------------------------------------------------------------------
@@ -133,15 +158,37 @@ export const translations = {
     inDaysOne: { en: 'In {count} day', tr: '{count} gün içinde', de: 'In {count} Tag' },
     inDaysOther: { en: 'In {count} days', tr: '{count} gün içinde', de: 'In {count} Tagen' },
 
-    // CalendarGrid weekday headers (single letters, Sun–Sat order).
-    // Turkish/German use locale-appropriate single-letter abbreviations.
-    weekdaySun: { en: 'S', tr: 'P', de: 'S' },
-    weekdayMon: { en: 'M', tr: 'P', de: 'M' },
-    weekdayTue: { en: 'T', tr: 'S', de: 'D' },
-    weekdayWed: { en: 'W', tr: 'Ç', de: 'M' },
-    weekdayThu: { en: 'T', tr: 'P', de: 'D' },
-    weekdayFri: { en: 'F', tr: 'C', de: 'F' },
-    weekdaySat: { en: 'S', tr: 'C', de: 'S' },
+    // CalendarGrid weekday headers (2-letter abbreviations, Sun–Sat order).
+    // Two letters because tr/de single letters collide (e.g. tr Pazar/Pazartesi
+    // both "P"; de Sonntag/Samstag both "S").
+    weekdaySun: { en: 'Su', tr: 'Pz', de: 'So' },
+    weekdayMon: { en: 'Mo', tr: 'Pt', de: 'Mo' },
+    weekdayTue: { en: 'Tu', tr: 'Sa', de: 'Di' },
+    weekdayWed: { en: 'We', tr: 'Ça', de: 'Mi' },
+    weekdayThu: { en: 'Th', tr: 'Pe', de: 'Do' },
+    weekdayFri: { en: 'Fr', tr: 'Cu', de: 'Fr' },
+    weekdaySat: { en: 'Sa', tr: 'Ct', de: 'Sa' },
+
+    // Month navigation aria-labels
+    prevMonth: { en: 'Previous month', tr: 'Önceki ay', de: 'Voriger Monat' },
+    nextMonth: { en: 'Next month', tr: 'Sonraki ay', de: 'Nächster Monat' },
+
+    // Countdown banner (CalendarView)
+    periodOverdueOne: { en: 'Period overdue by {count} day', tr: 'Regl {count} gün gecikti', de: 'Periode {count} Tag überfällig' },
+    periodOverdueOther: { en: 'Period overdue by {count} days', tr: 'Regl {count} gün gecikti', de: 'Periode {count} Tage überfällig' },
+    periodExpectedToday: { en: 'Period expected today', tr: 'Regl bugün bekleniyor', de: 'Periode heute erwartet' },
+    nextPeriodInOne: { en: 'Next period in {count} day', tr: 'Sonraki regl {count} gün içinde', de: 'Nächste Periode in {count} Tag' },
+    nextPeriodInOther: { en: 'Next period in {count} days', tr: 'Sonraki regl {count} gün içinde', de: 'Nächste Periode in {count} Tagen' },
+    around: { en: 'Around {date}', tr: 'Yaklaşık {date}', de: 'Etwa am {date}' },
+
+    // End-date selection banner
+    pickEndDate: { en: 'Pick the end date', tr: 'Bitiş tarihini seç', de: 'Enddatum wählen' },
+    periodStartingTap: {
+      en: 'Period starting {date} — tap the last day, or:',
+      tr: 'Regl {date} tarihinde başlıyor — son güne dokun ya da:',
+      de: 'Periode beginnt am {date} — tippe den letzten Tag an, oder:',
+    },
+    stillOngoing: { en: 'Still ongoing', tr: 'Hâlâ devam ediyor', de: 'Läuft noch' },
   },
 
   // ---------------------------------------------------------------------------
@@ -178,6 +225,59 @@ export const translations = {
   // ---------------------------------------------------------------------------
   settings: {
     title: { en: 'Settings', tr: 'Ayarlar', de: 'Einstellungen' },
+
+    // Preferences group + language selector
+    sectionPreferences: { en: 'Preferences', tr: 'Tercihler', de: 'Einstellungen' },
+    language: { en: 'Language', tr: 'Dil', de: 'Sprache' },
+
+    // Slim privacy banner (shorter than privacyBody below)
+    privacyBannerShort: {
+      en: 'Everything stays on your device. No accounts, no cloud, no tracking.',
+      tr: 'Her şey cihazında kalır. Hesap yok, bulut yok, takip yok.',
+      de: 'Alles bleibt auf deinem Gerät. Keine Konten, keine Cloud, kein Tracking.',
+    },
+    hideFertilityShort: {
+      en: "For when you're not trying to conceive.",
+      tr: 'Hamile kalmaya çalışmadığın zamanlar için.',
+      de: 'Für Zeiten, in denen du nicht schwanger werden möchtest.',
+    },
+
+    // Reminders group
+    sectionReminders: { en: 'Reminders', tr: 'Hatırlatıcılar', de: 'Erinnerungen' },
+    notifications: { en: 'Notifications', tr: 'Bildirimler', de: 'Benachrichtigungen' },
+    notifOnDevice: {
+      en: 'On-device only. Nothing leaves your phone.',
+      tr: 'Yalnızca cihazda. Telefonundan hiçbir şey çıkmaz.',
+      de: 'Nur auf dem Gerät. Nichts verlässt dein Telefon.',
+    },
+    notifPermissionHint: {
+      en: 'Reminders need the installed app with notifications allowed (iOS Settings → cycle vault → Notifications).',
+      tr: 'Hatırlatıcılar için yüklü uygulama ve izin verilmiş bildirimler gerekir (iOS Ayarlar → cycle vault → Bildirimler).',
+      de: 'Erinnerungen brauchen die installierte App mit erlaubten Benachrichtigungen (iOS-Einstellungen → cycle vault → Mitteilungen).',
+    },
+    reminderTime: { en: 'Reminder time', tr: 'Hatırlatma saati', de: 'Erinnerungszeit' },
+    enableNotifAria: { en: 'Enable notifications', tr: 'Bildirimleri etkinleştir', de: 'Benachrichtigungen aktivieren' },
+    groupBefore: { en: 'Before your period', tr: 'Reglinden önce', de: 'Vor deiner Periode' },
+    groupDuring: { en: 'During your period', tr: 'Reglin sırasında', de: 'Während deiner Periode' },
+    groupAfter: { en: 'After your period', tr: 'Reglinden sonra', de: 'Nach deiner Periode' },
+    groupFertility: { en: 'Fertility', tr: 'Doğurganlık', de: 'Fruchtbarkeit' },
+    groupTips: { en: 'Tips', tr: 'İpuçları', de: 'Tipps' },
+    reminderUpcoming: { en: 'Upcoming period', tr: 'Yaklaşan regl', de: 'Bevorstehende Periode' },
+    leadDayBefore: { en: '{count}d before', tr: '{count}g önce', de: '{count}T vorher' },
+    reminderStartDay: { en: 'Period start day', tr: 'Regl başlangıç günü', de: 'Periodenstart-Tag' },
+    reminderStartConfirm: { en: 'Did your period start?', tr: 'Reglin başladı mı?', de: 'Hat deine Periode begonnen?' },
+    reminderDaily: { en: 'Daily symptom reminder', tr: 'Günlük belirti hatırlatıcısı', de: 'Tägliche Symptom-Erinnerung' },
+    reminderEndConfirm: { en: 'Did it end? (log it)', tr: 'Bitti mi? (kaydet)', de: 'Vorbei? (erfassen)' },
+    reminderOvulation: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprung-Tag' },
+    reminderFertile: { en: 'Fertile window start', tr: 'Doğurgan dönem başlangıcı', de: 'Beginn der fruchtbaren Tage' },
+    reminderWellness: { en: 'Phase wellness tips', tr: 'Faz sağlık ipuçları', de: 'Phasen-Wellness-Tipps' },
+
+    // Data & backup group
+    sectionDataBackup: { en: 'Data & backup', tr: 'Veri ve yedek', de: 'Daten & Sicherung' },
+    cyclesShortOne: { en: '{count} cycle', tr: '{count} döngü', de: '{count} Zyklus' },
+    cyclesShortOther: { en: '{count} cycles', tr: '{count} döngü', de: '{count} Zyklen' },
+
+    loadSampleData: { en: 'Load sample data (dev)', tr: 'Örnek veri yükle (geliştirme)', de: 'Beispieldaten laden (Dev)' },
 
     // Privacy banner
     privacyTitle: { en: 'Your data is private', tr: 'Verilerin gizli', de: 'Deine Daten sind privat' },
@@ -328,6 +428,10 @@ export const translations = {
     labelStart: { en: 'Start', tr: 'Başlangıç', de: 'Beginn' },
     labelStarted: { en: 'Started', tr: 'Başladı', de: 'Begonnen' },
     labelEnd: { en: 'End', tr: 'Bitiş', de: 'Ende' },
+
+    // DayDetailSheet period actions
+    startPeriodHere: { en: 'Start a period here', tr: 'Burada regl başlat', de: 'Hier eine Periode starten' },
+    endPeriodOnDay: { en: 'End period on this day', tr: 'Reglini bu günde bitir', de: 'Periode an diesem Tag beenden' },
   },
 
   // ---------------------------------------------------------------------------
@@ -635,6 +739,81 @@ export const translations = {
       en: 'Calendar-based estimates are approximate — not for medical use.',
       tr: 'Takvim temelli tahminler yaklaşıktır — tıbbi kullanım için değildir.',
       de: 'Kalenderbasierte Schätzungen sind ungefähr — nicht für medizinische Zwecke.',
+    },
+  },
+
+  // ---------------------------------------------------------------------------
+  // Local notification copy (src/lib/notifications.ts). Keyed by copyKey +
+  // 'Title'/'Body' (e.g. copyKey 'upcoming' → notif.upcomingTitle/upcomingBody).
+  // Bodies use "day(s)" rather than plural variants so no plural selection is
+  // needed in the scheduler.
+  // ---------------------------------------------------------------------------
+  notif: {
+    upcomingTitle: { en: 'Period coming up', tr: 'Regl yaklaşıyor', de: 'Periode steht bevor' },
+    upcomingBody: {
+      en: 'Your period may start in {days} day(s).',
+      tr: 'Reglin {days} gün içinde başlayabilir.',
+      de: 'Deine Periode könnte in {days} Tag(en) beginnen.',
+    },
+    startDayTitle: { en: 'Period may start today', tr: 'Regl bugün başlayabilir', de: 'Periode könnte heute beginnen' },
+    startDayBody: {
+      en: 'Today is your predicted start day.',
+      tr: 'Bugün tahmini başlangıç günün.',
+      de: 'Heute ist dein voraussichtlicher Starttag.',
+    },
+    startConfirmTitle: { en: 'Did your period start?', tr: 'Reglin başladı mı?', de: 'Hat deine Periode begonnen?' },
+    startConfirmBody: {
+      en: 'Tap to log it so your predictions stay accurate.',
+      tr: 'Tahminlerin doğru kalsın diye kaydetmek için dokun.',
+      de: 'Tippe, um sie zu erfassen, damit deine Vorhersagen genau bleiben.',
+    },
+    duringPeriodTitle: { en: 'How are you feeling?', tr: 'Nasıl hissediyorsun?', de: 'Wie fühlst du dich?' },
+    duringPeriodBody: {
+      en: 'Log today’s flow and symptoms while your period is on.',
+      tr: 'Reglin devam ederken bugünkü kanama ve belirtilerini kaydet.',
+      de: 'Erfasse Blutung und Symptome von heute, während deine Periode läuft.',
+    },
+    endConfirmTitle: { en: 'Did your period end?', tr: 'Reglin bitti mi?', de: 'Ist deine Periode vorbei?' },
+    endConfirmBody: {
+      en: "You've been logged for {day} days — don't forget to log the end.",
+      tr: '{day} gündür kayıttasın — bitişi kaydetmeyi unutma.',
+      de: 'Du erfasst seit {day} Tagen — vergiss nicht, das Ende einzutragen.',
+    },
+    ovulationTitle: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprung-Tag' },
+    ovulationBody: {
+      en: 'Today is your predicted ovulation day.',
+      tr: 'Bugün tahmini yumurtlama günün.',
+      de: 'Heute ist dein voraussichtlicher Eisprung-Tag.',
+    },
+    fertileStartTitle: { en: 'Fertile window starting', tr: 'Doğurgan dönem başlıyor', de: 'Fruchtbare Tage beginnen' },
+    fertileStartBody: {
+      en: 'Your predicted fertile window begins today.',
+      tr: 'Tahmini doğurgan dönemin bugün başlıyor.',
+      de: 'Deine voraussichtlichen fruchtbaren Tage beginnen heute.',
+    },
+    tipMenstrualTitle: { en: 'Be kind to yourself', tr: 'Kendine iyi davran', de: 'Sei gut zu dir' },
+    tipMenstrualBody: {
+      en: 'Menstrual phase — rest and hydration help. Listen to your body.',
+      tr: 'Menstrüel faz — dinlenmek ve su içmek iyi gelir. Bedenini dinle.',
+      de: 'Menstruationsphase — Ruhe und Flüssigkeit helfen. Höre auf deinen Körper.',
+    },
+    tipFertileTitle: { en: 'Fertile phase', tr: 'Doğurgan faz', de: 'Fruchtbare Phase' },
+    tipFertileBody: {
+      en: "You're entering your fertile phase.",
+      tr: 'Doğurgan fazına giriyorsun.',
+      de: 'Du trittst in deine fruchtbare Phase ein.',
+    },
+    actionYes: { en: 'Yes, log it', tr: 'Evet, kaydet', de: 'Ja, erfassen' },
+    actionNo: { en: 'Not yet', tr: 'Henüz değil', de: 'Noch nicht' },
+    permissionDenied: {
+      en: 'Notifications are blocked. Enable them in iOS Settings → cycle vault.',
+      tr: 'Bildirimler engellenmiş. iOS Ayarlar → cycle vault üzerinden etkinleştir.',
+      de: 'Benachrichtigungen sind blockiert. Aktiviere sie in iOS-Einstellungen → cycle vault.',
+    },
+    webUnavailable: {
+      en: 'Notifications are only available in the installed app.',
+      tr: 'Bildirimler yalnızca yüklü uygulamada kullanılabilir.',
+      de: 'Benachrichtigungen sind nur in der installierten App verfügbar.',
     },
   },
 } as const satisfies Record<string, Record<string, TranslationEntry>>;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { NotificationSettings } from '../types';
 import { DEFAULT_NOTIFICATION_SETTINGS } from '../types';
+import { detectLocale, isLocale, type Locale } from '../i18n';
 
 const STORAGE_KEY = 'cycle-tracker-settings-v1';
 
@@ -10,6 +11,8 @@ interface Settings {
    *  ovulation predictions throughout the app. Off by default. */
   hideFertility?: boolean;
   notifications?: NotificationSettings;
+  /** UI language. Defaults to navigator.language on first run. */
+  locale?: Locale;
 }
 
 function loadSettings(): Settings {
@@ -39,6 +42,8 @@ export function useSettings() {
       updateSettings({ customCycleLength: v }),
     hideFertility: settings.hideFertility ?? false,
     setHideFertility: (v: boolean) => updateSettings({ hideFertility: v }),
+    locale: isLocale(settings.locale) ? settings.locale : detectLocale(),
+    setLocale: (v: Locale) => updateSettings({ locale: v }),
     notifications: { ...DEFAULT_NOTIFICATION_SETTINGS, ...settings.notifications },
     setNotifications: (patch: Partial<NotificationSettings>) =>
       updateSettings({
