@@ -28,7 +28,7 @@ export default function App() {
     }
   };
 
-  const { customCycleLength, setCustomCycleLength } = useSettings();
+  const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility } = useSettings();
 
   const {
     cycles,
@@ -47,7 +47,7 @@ export default function App() {
     importCSV,
     importJSON,
     getPhaseForDate,
-  } = useCycles(customCycleLength ?? 28);
+  } = useCycles(customCycleLength ?? 28, hideFertility);
 
   const { allLogs, todayLog, setLog, clearAllLogs } = useDayLogs();
 
@@ -64,7 +64,7 @@ export default function App() {
     if (!cycles.length) return undefined;
     const parts: string[] = ['cycle vault summary'];
     if (cycleDay) parts.push(`Cycle day: ${cycleDay}`);
-    if (todayPhase) parts.push(`Phase: ${phaseTypeToUI(todayPhase.type)}`);
+    if (todayPhase) parts.push(`Phase: ${phaseTypeToUI(todayPhase.type, hideFertility)}`);
     if (nextPeriod) parts.push(`Next period: in ${nextPeriod.daysToNext} day${nextPeriod.daysToNext === 1 ? '' : 's'}`);
     if (todayLog) {
       if (todayLog.mood?.length) parts.push(`Mood: ${todayLog.mood.join(', ')}`);
@@ -137,7 +137,7 @@ export default function App() {
         <header className="flex items-center mb-12">
           <div className="flex items-center gap-3">
             <img src={import.meta.env.BASE_URL + 'flower.png'} alt="" className="w-8 h-8" />
-            <h1 className="text-2xl font-bold lowercase" style={{ fontFamily: '"Lora", serif' }}>cycle vault</h1>
+            <h1 className="text-2xl font-bold lowercase font-serif">cycle vault</h1>
           </div>
         </header>
 
@@ -172,6 +172,7 @@ export default function App() {
               getPhaseForDate={getPhaseForDate}
               dayLogs={allLogs}
               onUpdateLog={handleUpdateLogForDate}
+              hideFertility={hideFertility}
             />
           )}
 
@@ -206,6 +207,8 @@ export default function App() {
               customCycleLength={customCycleLength}
               onSetCycleLength={setCustomCycleLength}
               computedCycleLength={getCycleStats(cycles)?.med}
+              hideFertility={hideFertility}
+              onSetHideFertility={setHideFertility}
             />
           )}
         </AnimatePresence>

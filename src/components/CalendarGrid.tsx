@@ -26,13 +26,21 @@ interface CalendarGridProps {
   dayLogs?: DayLogs;
   /** Called when a day is tapped (non-selectable mode) */
   onDayTap?: (dateStr: string) => void;
+  /** Childfree / not-TTC mode: render fertile + ovulation days as follicular */
+  hideFertility?: boolean;
 }
 
 const DAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-function getPhaseClass(phase: PhaseResult | null): string {
+/** Collapse fertile/ovulation to follicular when fertility is hidden. */
+function effectiveType(type: PhaseResult['type'], hideFertility: boolean): PhaseResult['type'] {
+  if (hideFertility && (type === 'fertile' || type === 'ovulation')) return 'follicular';
+  return type;
+}
+
+function getPhaseClass(phase: PhaseResult | null, hideFertility: boolean): string {
   if (!phase) return '';
-  switch (phase.type) {
+  switch (effectiveType(phase.type, hideFertility)) {
     case 'period':
       return phase.recorded ? 'bg-menstrual/30 text-menstrual' : 'bg-menstrual/15 text-menstrual/70';
     case 'fertile':
@@ -48,9 +56,9 @@ function getPhaseClass(phase: PhaseResult | null): string {
   }
 }
 
-function getPhaseDot(phase: PhaseResult | null): string | null {
+function getPhaseDot(phase: PhaseResult | null, hideFertility: boolean): string | null {
   if (!phase) return null;
-  switch (phase.type) {
+  switch (effectiveType(phase.type, hideFertility)) {
     case 'period': return 'bg-menstrual';
     case 'fertile': return 'bg-follicular';
     case 'ovulation': return 'bg-ovulation';
@@ -59,7 +67,7 @@ function getPhaseDot(phase: PhaseResult | null): string | null {
   }
 }
 
-export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSelectDate, dayLogs, onDayTap }: CalendarGridProps) {
+export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSelectDate, dayLogs, onDayTap, hideFertility = false }: CalendarGridProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const touchStartX = useRef(0);
 
@@ -132,8 +140,8 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
           const isToday = isSameDay(day, today);
           const dateStr = ymd(day);
           const phase = inMonth ? getPhaseForDate(dateStr) : null;
-          const phaseClass = getPhaseClass(phase);
-          const dot = getPhaseDot(phase);
+          const phaseClass = getPhaseClass(phase, hideFertility);
+          const dot = getPhaseDot(phase, hideFertility);
           const inRange = isInRange(day);
           const hasSymptom = inMonth && dayLogs && dateStr in dayLogs;
           const tappable = !selectable && onDayTap && inMonth;

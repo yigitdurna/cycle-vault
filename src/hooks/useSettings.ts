@@ -4,6 +4,9 @@ const STORAGE_KEY = 'cycle-tracker-settings-v1';
 
 interface Settings {
   customCycleLength?: number;
+  /** Childfree / not-trying-to-conceive mode: hides fertile-window and
+   *  ovulation predictions throughout the app. Off by default. */
+  hideFertility?: boolean;
 }
 
 function loadSettings(): Settings {
@@ -27,5 +30,7 @@ export function useSettings() {
     customCycleLength: settings.customCycleLength,
     setCustomCycleLength: (v: number | undefined) =>
       updateSettings({ customCycleLength: v }),
+    hideFertility: settings.hideFertility ?? false,
+    setHideFertility: (v: boolean) => updateSettings({ hideFertility: v }),
   };
 }

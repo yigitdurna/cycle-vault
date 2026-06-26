@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Download, Upload, Trash2, FileJson, FileSpreadsheet, Shield, Share2, RefreshCw, Check } from 'lucide-react';
+import { Download, Upload, Trash2, FileJson, FileSpreadsheet, Shield, Share2, RefreshCw, Check, FileText, ExternalLink } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { cn } from '../lib/utils';
 import type { Cycle } from '../types';
 
 interface SettingsViewProps {
@@ -15,9 +16,11 @@ interface SettingsViewProps {
   customCycleLength: number | undefined;
   onSetCycleLength: (v: number | undefined) => void;
   computedCycleLength: number | undefined;
+  hideFertility: boolean;
+  onSetHideFertility: (v: boolean) => void;
 }
 
-export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength }: SettingsViewProps) {
+export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength, hideFertility, onSetHideFertility }: SettingsViewProps) {
   const [clearConfirm, setClearConfirm] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -149,6 +152,39 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
         </div>
       </div>
 
+      {/* Tracking preferences */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Tracking</h3>
+        <div className="glass rounded-3xl p-5">
+          <label className="flex items-center justify-between gap-4 cursor-pointer">
+            <div>
+              <div className="text-sm font-medium">Hide fertility &amp; ovulation</div>
+              <div className="text-xs text-white/55 mt-0.5">
+                For when you&apos;re not trying to conceive — removes fertile-window and ovulation predictions everywhere.
+              </div>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={hideFertility}
+              aria-label="Hide fertility and ovulation predictions"
+              onClick={() => onSetHideFertility(!hideFertility)}
+              className={cn(
+                'relative w-12 h-7 rounded-full shrink-0 transition-colors',
+                hideFertility ? 'bg-accent/70' : 'bg-white/15',
+              )}
+            >
+              <span
+                className={cn(
+                  'absolute top-1 left-1 w-5 h-5 rounded-full bg-white transition-transform',
+                  hideFertility && 'translate-x-5',
+                )}
+              />
+            </button>
+          </label>
+        </div>
+      </div>
+
       {/* Data Info */}
       <div className="glass rounded-3xl p-5">
         <div className="text-xs text-white/40 uppercase tracking-wider font-medium">Data</div>
@@ -275,6 +311,37 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
             <div className="text-xs text-white/40">Permanently delete all cycles</div>
           </div>
         </button>
+      </div>
+
+      {/* Privacy & Legal */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-white/40 px-1">Privacy &amp; Legal</h3>
+        <a
+          href={import.meta.env.BASE_URL + 'privacy.html'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+        >
+          <Shield size={20} className="text-white/50" />
+          <div className="text-left">
+            <div className="text-sm font-medium">Privacy Policy</div>
+            <div className="text-xs text-white/55">How your data is handled (it never leaves your device)</div>
+          </div>
+          <ExternalLink size={16} className="text-white/30 ml-auto" />
+        </a>
+        <a
+          href={import.meta.env.BASE_URL + 'terms.html'}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full glass rounded-2xl p-4 flex items-center gap-4 hover:bg-white/10 transition-colors"
+        >
+          <FileText size={20} className="text-white/50" />
+          <div className="text-left">
+            <div className="text-sm font-medium">Terms &amp; Medical Disclaimer</div>
+            <div className="text-xs text-white/55">Not medical advice; not for contraception</div>
+          </div>
+          <ExternalLink size={16} className="text-white/30 ml-auto" />
+        </a>
       </div>
 
       {/* Version */}

@@ -62,11 +62,13 @@ export const PHASES: Record<CyclePhase, PhaseInfo> = {
 };
 
 /** Map engine phase type → UI phase */
-export function phaseTypeToUI(type: PhaseType): CyclePhase {
+export function phaseTypeToUI(type: PhaseType, hideFertility = false): CyclePhase {
   switch (type) {
     case 'period': return 'Menstrual';
+    // In childfree / not-TTC mode, fertile and ovulation days are presented as
+    // the surrounding Follicular phase so no fertility framing surfaces.
     case 'fertile': return 'Follicular'; // fertile window is during follicular
-    case 'ovulation': return 'Ovulation';
+    case 'ovulation': return hideFertility ? 'Follicular' : 'Ovulation';
     case 'luteal': return 'Luteal';
     case 'follicular': return 'Follicular';
     case 'future': return 'Follicular'; // default

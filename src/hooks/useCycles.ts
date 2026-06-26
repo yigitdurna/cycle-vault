@@ -93,7 +93,7 @@ function saveCycles(cycles: Cycle[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cycles));
 }
 
-export function useCycles(defaultCycleLength = 28) {
+export function useCycles(defaultCycleLength = 28, hideFertility = false) {
   const [cycles, setCycles] = useState<Cycle[]>(loadCycles);
 
   // Always points at the latest cycles. The async import callbacks below
@@ -147,8 +147,8 @@ export function useCycles(defaultCycleLength = 28) {
 
   const todayUIPhase = useMemo(() => {
     if (!todayPhase) return PHASES.Follicular;
-    return PHASES[phaseTypeToUI(todayPhase.type)];
-  }, [todayPhase]);
+    return PHASES[phaseTypeToUI(todayPhase.type, hideFertility)];
+  }, [todayPhase, hideFertility]);
 
   const nextPeriod = useMemo(() => {
     return getNextPeriodDate(cycles, defaultCycleLength);

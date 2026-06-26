@@ -12,9 +12,10 @@ interface CalendarViewProps {
   getPhaseForDate: (dateStr: string) => PhaseResult | null;
   dayLogs?: DayLogs;
   onUpdateLog?: (date: string, log: Partial<DayLog>) => void;
+  hideFertility?: boolean;
 }
 
-export function CalendarView({ cycles, getPhaseForDate, dayLogs, onUpdateLog }: CalendarViewProps) {
+export function CalendarView({ cycles, getPhaseForDate, dayLogs, onUpdateLog, hideFertility = false }: CalendarViewProps) {
   const nextPeriod = getNextPeriodDate(cycles);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ export function CalendarView({ cycles, getPhaseForDate, dayLogs, onUpdateLog }: 
   };
 
   const selectedPhase = selectedDate ? getPhaseForDate(selectedDate) : null;
-  const selectedUIPhase = selectedPhase ? PHASES[phaseTypeToUI(selectedPhase.type)] : PHASES.Follicular;
+  const selectedUIPhase = selectedPhase ? PHASES[phaseTypeToUI(selectedPhase.type, hideFertility)] : PHASES.Follicular;
 
   return (
     <motion.div
@@ -38,6 +39,7 @@ export function CalendarView({ cycles, getPhaseForDate, dayLogs, onUpdateLog }: 
           getPhaseForDate={getPhaseForDate}
           dayLogs={dayLogs}
           onDayTap={handleDayTap}
+          hideFertility={hideFertility}
         />
       </div>
 
@@ -47,17 +49,25 @@ export function CalendarView({ cycles, getPhaseForDate, dayLogs, onUpdateLog }: 
           <div className="w-3 h-3 rounded-full bg-menstrual" />
           <span className="text-xs text-white/50">Period</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-follicular" />
-          <span className="text-xs text-white/50">Fertile</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-ovulation" />
-          <span className="text-xs text-white/50">Ovulation</span>
-        </div>
+        {!hideFertility && (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-follicular" />
+              <span className="text-xs text-white/55">Fertile</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-ovulation" />
+              <span className="text-xs text-white/55">Ovulation</span>
+            </div>
+          </>
+        )}
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-luteal" />
-          <span className="text-xs text-white/50">Luteal</span>
+          <span className="text-xs text-white/55">Luteal</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+          <span className="text-xs text-white/55">Logged</span>
         </div>
       </div>
 
