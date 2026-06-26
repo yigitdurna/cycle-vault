@@ -219,3 +219,57 @@ export function getCurrentCycleDay(cycles: Cycle[], fallback = 28): number | nul
 
   return diff(todayYmd, anchorStart) + 1;
 }
+
+// --- History / summary statistics (for the dashboard) ---
+
+export interface CycleHistoryStats {
+  /** Number of cycles recorded. */
+  cycleCount: number;
+  /** Median start-to-start cycle length, or null with < 2 cycles. */
+  medianCycle: number | null;
+  /** Average recorded period (bleed) length, or null if none closed. */
+  avgPeriod: number | null;
+  shortestCycle: number | null;
+  longestCycle: number | null;
+  /** Regularity bucket from the spread of cycle lengths (needs >= 3 cycles). */
+  regularity: 'regular' | 'mostly regular' | 'irregular' | null;
+  /** Recent cycles, newest first, with their start-to-start length (last is null = ongoing). */
+  recent: { start: string; end: string | null; length: number | null }[];
+}
+
+export function getCycleHistoryStats(cycles: Cycle[]): CycleHistoryStats {
+  const sorted = [...cycles].sort((a, b) => a.start.localeCompare(b.start));
+  const starts = sorted.map(c => c.start);
+
+  const lens: number[] = [];
+  for (let i = 1; i < starts.length; i++) lens.push(diff(starts[i], starts[i - 1]));
+
+  const periodLens = sorted
+    .filter(c => c.end)
+    .map(c => diff(c.end as string, c.start) + 1);
+
+  const medianCycle = lens.length ? Math.round(median(lens)) : null;
+  const shortestCycle = lens.length ? Math.min(...lens) : null;
+  const longestCycle = lens.length ? Math.max(...lens) : null;
+  const avgPeriod = periodLens.length
+    ? Math.round(periodLens.reduce((a, b) => a + b, 0) / periodLens.length)
+    : null;
+
+  let regularity: CycleHistoryStats['regularity'] = null;
+  if (lens.length >= 2 && shortestCycle !== null && longestCycle !== null) {
+    const spread = longestCycle - shortestCycle;
+    regularity = spread <= 3 ? 'regular' : spread <= 7 ? 'mostly regular' : 'irregular';
+  }
+
+  // Recent cycles newest-first; length is the gap to the NEXT start (null for the latest).
+  const recent = sorted
+    .map((c, i) => ({
+      start: c.start,
+      end: c.end,
+      length: i < sorted.length - 1 ? diff(sorted[i + 1].start, c.start) : null,
+    }))
+    .reverse()
+    .slice(0, 4);
+
+  return { cycleCount: cycles.length, medianCycle, avgPeriod, shortestCycle, longestCycle, regularity, recent };
+}

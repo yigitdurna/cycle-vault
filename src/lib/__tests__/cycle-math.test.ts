@@ -9,6 +9,7 @@ import {
   getPhaseForDate,
   getNextPeriodDate,
   getCurrentCycleDay,
+  getCycleHistoryStats,
 } from '../cycle-math';
 import type { Cycle } from '../../types';
 
@@ -345,6 +346,45 @@ describe('getPhaseForDate', () => {
       const future = getPhaseForDate('2026-06-15', active);
       expect(future?.recorded).not.toBe(true);
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getCycleHistoryStats
+// ---------------------------------------------------------------------------
+
+describe('getCycleHistoryStats', () => {
+  it('returns zeroed/null stats for no cycles', () => {
+    const s = getCycleHistoryStats([]);
+    expect(s.cycleCount).toBe(0);
+    expect(s.medianCycle).toBeNull();
+    expect(s.regularity).toBeNull();
+  });
+
+  it('computes median cycle, avg period, range, and regularity', () => {
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: '2026-01-05' }, // period 5
+      { start: '2026-01-30', end: '2026-02-03' }, // +29, period 5
+      { start: '2026-02-28', end: '2026-03-04' }, // +29, period 6
+    ];
+    const s = getCycleHistoryStats(cycles);
+    expect(s.cycleCount).toBe(3);
+    expect(s.medianCycle).toBe(29);      // lengths [29, 29]
+    expect(s.shortestCycle).toBe(29);
+    expect(s.longestCycle).toBe(29);
+    expect(s.avgPeriod).toBe(5);         // (5+5+6)/3 = 5.33 → 5
+    expect(s.regularity).toBe('regular');// spread 0
+    expect(s.recent[0].start).toBe('2026-02-28'); // newest first
+    expect(s.recent[0].length).toBeNull();        // latest has no next start
+  });
+
+  it('flags irregular cycles when the spread is large', () => {
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: null },
+      { start: '2026-01-25', end: null }, // +24
+      { start: '2026-03-05', end: null }, // +39
+    ];
+    expect(getCycleHistoryStats(cycles).regularity).toBe('irregular');
   });
 });
 

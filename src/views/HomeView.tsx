@@ -6,6 +6,7 @@ import { StatCard } from '../components/StatCard';
 import { PhaseCard } from '../components/PhaseCard';
 import { TodayInsightsPanel } from '../components/TodayInsightsPanel';
 import { InsightsPanel } from '../components/InsightsPanel';
+import { CycleHistoryPanel } from '../components/CycleHistoryPanel';
 import type { PhaseInfo, PhaseResult, Insight, CyclePhase } from '../types';
 import type { Cycle } from '../types';
 import { getCycleStats } from '../lib/cycle-math';
@@ -77,6 +78,8 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
       {hasCycles && (
         <InsightsPanel insights={insights} hasEnoughData={hasEnoughData} />
       )}
+
+      {hasCycles && <CycleHistoryPanel cycles={cycles} />}
 
       {hasCycles ? (
         <PhaseCard phaseInfo={phaseInfoWithPersonalization} subtitle={phaseSubtitle} />
