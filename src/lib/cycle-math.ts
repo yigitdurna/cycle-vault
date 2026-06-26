@@ -97,8 +97,14 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
   const stats = getCycleStats(cycles, fallback);
   if (!stats) return null;
 
-  // 1. Check if inside a recorded period (Exact Match)
-  const recorded = cycles.find(c => c.end && dateStr >= c.start && dateStr <= c.end);
+  // 1. Check if inside a recorded period (Exact Match). An active (open) cycle
+  //    counts as a recorded period from its start through today, so an ongoing
+  //    period keeps showing as "period" past the default 5-day length.
+  const todayStr = ymd(new Date());
+  const recorded = cycles.find(c =>
+    (c.end && dateStr >= c.start && dateStr <= c.end) ||
+    (c.end === null && dateStr >= c.start && dateStr <= todayStr)
+  );
   if (recorded) {
     return { type: 'period', day: diff(dateStr, recorded.start) + 1, recorded: true };
   }

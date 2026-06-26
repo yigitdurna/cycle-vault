@@ -12,6 +12,8 @@ interface DayDetailSheetProps {
   phaseName: string;
   phaseColor: string;
   activeCycle: Cycle | null;
+  /** True when this date already falls inside a recorded (closed) period. */
+  dateInRecordedPeriod?: boolean;
   onStartPeriod: (date: string) => void;
   onEndPeriod: (date: string) => void;
   onClose: () => void;
@@ -72,7 +74,7 @@ const PAIN_LABELS: Record<string, string> = {
   joints: 'Joints',
 };
 
-export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeCycle, onStartPeriod, onEndPeriod, onClose, onUpdateLog }: DayDetailSheetProps) {
+export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeCycle, dateInRecordedPeriod = false, onStartPeriod, onEndPeriod, onClose, onUpdateLog }: DayDetailSheetProps) {
   const [editing, setEditing] = useState(false);
 
   // Always reopen in read mode for a fresh day.
@@ -93,7 +95,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
 
   // Period actions for this date: start one if none is active, or end the
   // active one on this day.
-  const canStartPeriod = !activeCycle;
+  const canStartPeriod = !activeCycle && !dateInRecordedPeriod;
   const canEndPeriod = !!activeCycle && date >= activeCycle.start;
 
   return (

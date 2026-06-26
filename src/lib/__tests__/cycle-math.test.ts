@@ -323,6 +323,29 @@ describe('getPhaseForDate', () => {
     // daysSince = diff('2026-03-15', '2026-01-01') = 73 > 1.5 * 28 = 42
     expect(getPhaseForDate('2026-03-15', baseCycles)).toBeNull();
   });
+
+  describe('active (open) period', () => {
+    afterEach(() => vi.useRealTimers());
+
+    it('treats an ongoing period as recorded from start through today', () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 5, 10, 12, 0, 0)); // 2026-06-10
+      const active: Cycle[] = [{ start: '2026-06-01', end: null }];
+
+      // Day 8 of an ongoing period — beyond the default 5-day length — still period.
+      const mid = getPhaseForDate('2026-06-08', active);
+      expect(mid?.type).toBe('period');
+      expect(mid?.recorded).toBe(true);
+      expect(mid?.day).toBe(8);
+
+      // Today counts too.
+      expect(getPhaseForDate('2026-06-10', active)?.type).toBe('period');
+
+      // A future date is not part of the recorded active period.
+      const future = getPhaseForDate('2026-06-15', active);
+      expect(future?.recorded).not.toBe(true);
+    });
+  });
 });
 
 // ---------------------------------------------------------------------------

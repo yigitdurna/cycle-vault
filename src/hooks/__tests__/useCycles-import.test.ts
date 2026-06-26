@@ -115,4 +115,28 @@ describe('exportCSV neutralizes spreadsheet formula injection', () => {
       URL.revokeObjectURL = realRevoke;
     }
   });
+
+  it('escapes formula injection in non-note cells too (e.g. an imported mood)', async () => {
+    const realCreate = URL.createObjectURL;
+    const realRevoke = URL.revokeObjectURL;
+    const blobs: Blob[] = [];
+    URL.createObjectURL = (b: Blob) => { blobs.push(b); return 'blob:mock'; };
+    URL.revokeObjectURL = () => {};
+
+    try {
+      const { result } = renderHook(() => useCycles());
+      act(() => { result.current.addCycle('2026-03-01', '2026-03-05'); });
+      act(() => {
+        // A malicious imported log could put a formula in a non-note field.
+        result.current.exportCSV({
+          '2026-03-01': { date: '2026-03-01', mood: ['=cmd|"/c calc"!A1' as never] },
+        });
+      });
+      const text = await blobs[0].text();
+      expect(text).toContain("'=cmd"); // mood cell was guarded
+    } finally {
+      URL.createObjectURL = realCreate;
+      URL.revokeObjectURL = realRevoke;
+    }
+  });
 });

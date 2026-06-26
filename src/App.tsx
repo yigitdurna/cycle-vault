@@ -13,6 +13,7 @@ import { SettingsView } from './views/SettingsView';
 import { LogPeriodSheet } from './components/LogPeriodSheet';
 import { DayDetailSheet } from './components/DayDetailSheet';
 import { useInsights } from './hooks/useInsights';
+import { useNotifications } from './hooks/useNotifications';
 import { phaseTypeToUI, PHASES } from './types';
 import type { Cycle, DayLog } from './types';
 
@@ -29,7 +30,7 @@ export default function App() {
     setActiveTab(tab);
   };
 
-  const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility } = useSettings();
+  const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility, notifications, setNotifications } = useSettings();
 
   const {
     cycles,
@@ -51,6 +52,10 @@ export default function App() {
   } = useCycles(customCycleLength ?? 28, hideFertility);
 
   const { allLogs, todayLog, setLog, clearAllLogs } = useDayLogs();
+
+  // Keep on-device reminders in sync (no-op on web). "Yes, log it" on the
+  // "did your period start?" notification starts a period on the predicted day.
+  useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null));
 
   const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
 
@@ -87,6 +92,14 @@ export default function App() {
     const p = getPhaseForDate(detailDate);
     return p ? PHASES[phaseTypeToUI(p.type, hideFertility)] : PHASES.Follicular;
   }, [detailDate, getPhaseForDate, hideFertility]);
+
+  // Don't offer "start period" on a date already inside a recorded period —
+  // a new open cycle would overlap and the existing one would be discarded.
+  const detailInRecordedPeriod = !!detailDate && cycles.some(
+    c => c.end !== null && detailDate >= c.start && detailDate <= c.end
+  );
+
+  const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
 
   const openLogSheet = () => {
     setEditingCycle(null);
@@ -219,6 +232,9 @@ export default function App() {
               computedCycleLength={getCycleStats(cycles)?.med}
               hideFertility={hideFertility}
               onSetHideFertility={setHideFertility}
+              hasData={hasData}
+              notifications={notifications}
+              onSetNotifications={setNotifications}
             />
           )}
         </AnimatePresence>
@@ -248,6 +264,7 @@ export default function App() {
         phaseName={detailUIPhase.name}
         phaseColor={detailUIPhase.color}
         activeCycle={activeCycle}
+        dateInRecordedPeriod={detailInRecordedPeriod}
         onStartPeriod={(d) => { addCycle(d, null); setDetailDate(null); }}
         onEndPeriod={(d) => { endCycle(d); setDetailDate(null); }}
         onUpdateLog={handleUpdateLogForDate}

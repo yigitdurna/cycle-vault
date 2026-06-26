@@ -204,8 +204,11 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
         const painLocs = log.pain?.locations.join('; ') ?? '';
         const painSev = log.pain != null ? ['Mild', 'Moderate', 'Severe'][log.pain.severity - 1] : '';
         const impact = log.functionalImpact === true ? 'Yes' : log.functionalImpact === false ? 'No' : '';
-        const note = log.note ? esc(log.note) : '';
-        return [date, cycle?.start ?? '', cycle?.end ?? '', flow, mood, energy, cramps, painLocs, painSev, impact, note].join(',');
+        const note = log.note ?? '';
+        // esc() both CSV-quotes and neutralizes formula injection. Apply it to
+        // every user/imported-derived cell, not just the note.
+        return [date, cycle?.start ?? '', cycle?.end ?? '', flow, mood, energy, cramps, painLocs, painSev, impact, note]
+          .map(esc).join(',');
       });
       csvContent = [header, ...rows].join('\n');
       filename = 'cycle-vault-symptoms.csv';
