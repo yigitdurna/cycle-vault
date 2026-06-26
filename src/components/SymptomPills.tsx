@@ -57,8 +57,8 @@ function Pill({
       onClick={onClick}
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors shrink-0 ${
         active
-          ? 'bg-accent/20 border-accent/40 text-white'
-          : 'bg-white/5 border-white/10 text-white/60'
+          ? 'bg-accent/20 border-accent/40 text-accent'
+          : 'bg-ink/[0.05] border-ink/[0.08] text-ink/65'
       }`}
     >
       <Icon size={14} />
@@ -109,8 +109,8 @@ function OptionButton({ label, active, onClick }: { label: string; active: boole
       onClick={onClick}
       className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
         active
-          ? 'bg-accent/20 border-accent/40 text-white'
-          : 'bg-white/5 border-white/10 text-white/50'
+          ? 'bg-accent/20 border-accent/40 text-accent'
+          : 'bg-ink/[0.05] border-ink/[0.08] text-ink/60'
       }`}
     >
       {label}
@@ -211,7 +211,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
 
   return (
     <div className="w-full mt-8">
-      <p className="text-sm text-white/30 font-serif italic mb-4">
+      <p className="text-sm text-ink/45 font-serif italic mb-4">
         How are you feeling today?
       </p>
 
@@ -262,7 +262,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
 
       {/* Pain popover */}
       <Popover open={openPopover === 'pain'} onClose={() => setOpenPopover(null)}>
-        <p className="text-xs text-white/40 mb-2">Location</p>
+        <p className="text-xs text-ink/55 mb-2">Location</p>
         <div className="flex flex-wrap gap-2 mb-3">
           {PAIN_LOCATIONS.map(loc => (
             <OptionButton key={loc} label={loc.charAt(0).toUpperCase() + loc.slice(1)} active={draft.pain?.locations.includes(loc) ?? false} onClick={() => togglePainLocation(loc)} />
@@ -270,7 +270,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
         </div>
         {draft.pain && draft.pain.locations.length > 0 && (
           <>
-            <p className="text-xs text-white/40 mb-2">Severity</p>
+            <p className="text-xs text-ink/55 mb-2">Severity</p>
             <div className="flex gap-2">
               {([1, 2, 3] as Severity[]).map(s => (
                 <OptionButton key={s} label={SEVERITY_LABELS[s]} active={draft.pain?.severity === s} onClick={() => setPainSeverity(s)} />
@@ -282,7 +282,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
 
       {/* Functional impact */}
       <div className="flex items-center justify-between mt-4">
-        <p className="text-xs text-white/40">Symptoms affected your day?</p>
+        <p className="text-xs text-ink/55">Symptoms affected your day?</p>
         <div className="flex gap-2">
           <OptionButton label="Yes" active={draft.functionalImpact === true} onClick={() => setImpact(true)} />
           <OptionButton label="No" active={draft.functionalImpact === false} onClick={() => setImpact(false)} />
@@ -295,11 +295,11 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
         {draft.note && (
           <div className="glass rounded-xl px-3 py-2">
             <div className="flex items-start gap-2">
-              <MessageSquare size={12} className="text-white/30 mt-0.5 shrink-0" />
-              <p className="text-xs text-white/60 leading-relaxed flex-1">{draft.note}</p>
+              <MessageSquare size={12} className="text-ink/45 mt-0.5 shrink-0" />
+              <p className="text-xs text-ink/65 leading-relaxed flex-1">{draft.note}</p>
               <button
                 onClick={() => setDraft(d => { const { note: _, ...rest } = d; return rest; })}
-                className="text-white/20 hover:text-white/50 transition-colors shrink-0 mt-0.5"
+                className="text-ink/35 hover:text-ink/60 transition-colors shrink-0 mt-0.5"
                 aria-label="Delete note"
               >
                 <X size={12} />
@@ -312,7 +312,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
         {!noteOpen ? (
           <button
             onClick={() => setNoteOpen(true)}
-            className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/60 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-ink/55 hover:text-ink/65 transition-colors"
           >
             <MessageSquare size={12} />
             <span>{draft.note ? 'Add more...' : 'Add note...'}</span>
@@ -336,7 +336,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
             placeholder="Add to your notes..."
             maxLength={500}
             rows={2}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white/80 placeholder:text-white/30 focus:outline-none focus:border-accent/40 resize-none"
+            className="w-full bg-ink/[0.05] border border-ink/[0.08] rounded-xl px-3 py-2 text-sm text-ink/80 placeholder:text-ink/45 focus:outline-none focus:border-accent/40 resize-none"
           />
         )}
       </div>
@@ -370,7 +370,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.2 }}
               onClick={handleSave}
-              className="px-8 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-sm font-medium text-white hover:bg-accent/30 transition-colors"
+              className="px-8 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-sm font-medium text-accent hover:bg-accent/30 transition-colors"
             >
               Save
             </motion.button>

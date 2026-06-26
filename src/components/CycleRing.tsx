@@ -33,7 +33,7 @@ export function CycleRing({ day, totalDays, phaseInfo }: CycleRingProps) {
           stroke="currentColor"
           strokeWidth="12"
           fill="transparent"
-          className="text-white/5"
+          className="text-ink/[0.05]"
         />
         {/* Progress Ring */}
         <motion.circle

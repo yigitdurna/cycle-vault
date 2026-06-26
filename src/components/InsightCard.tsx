@@ -26,12 +26,12 @@ export function InsightCard({ insight, index }: InsightCardProps) {
       className="glass rounded-2xl p-4"
     >
       <div className="flex gap-3">
-        <div className="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-ink/[0.05] flex items-center justify-center shrink-0">
           <Icon size={16} className={config.color} />
         </div>
         <div className="min-w-0">
           <p className="text-sm font-medium">{insight.title}</p>
-          <p className="text-xs text-white/40 mt-0.5 leading-relaxed">{insight.description}</p>
+          <p className="text-xs text-ink/55 mt-0.5 leading-relaxed">{insight.description}</p>
         </div>
       </div>
     </motion.div>

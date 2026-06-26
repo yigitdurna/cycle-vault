@@ -118,22 +118,22 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-end justify-center"
         >
-          <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+          <div className="absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onClose} />
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative z-10 w-full max-w-lg bg-bg-dark border-t border-white/10 rounded-t-[2rem] p-6 pb-10 max-h-[85vh] overflow-y-auto"
+            className="relative z-10 w-full max-w-lg bg-bg border-t border-ink/[0.08] rounded-t-[2rem] p-6 pb-10 max-h-[85vh] overflow-y-auto"
           >
             {/* Handle */}
-            <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4" />
+            <div className="w-10 h-1 rounded-full bg-ink/[0.12] mx-auto mb-4" />
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-serif font-bold">
                 {TITLES[mode]}
               </h3>
-              <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+              <button onClick={onClose} className="w-8 h-8 rounded-full bg-ink/[0.05] flex items-center justify-center">
                 <X size={16} />
               </button>
             </div>
@@ -147,8 +147,8 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                   className={cn(
                     'flex-1 py-2 px-3 rounded-xl text-xs font-medium transition-all',
                     mode === 'start'
-                      ? 'bg-white/15 text-white'
-                      : 'bg-white/5 text-white/40',
+                      ? 'bg-ink/[0.10] text-ink'
+                      : 'bg-ink/[0.05] text-ink/55',
                     activeCycle && 'opacity-30 cursor-not-allowed'
                   )}
                 >
@@ -160,8 +160,8 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                     className={cn(
                       'flex-1 py-2 px-3 rounded-xl text-xs font-medium transition-all',
                       mode === 'end'
-                        ? 'bg-white/15 text-white'
-                        : 'bg-white/5 text-white/40'
+                        ? 'bg-ink/[0.10] text-ink'
+                        : 'bg-ink/[0.05] text-ink/55'
                     )}
                   >
                     End Cycle
@@ -172,8 +172,8 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                   className={cn(
                     'flex-1 py-2 px-3 rounded-xl text-xs font-medium transition-all',
                     mode === 'log'
-                      ? 'bg-white/15 text-white'
-                      : 'bg-white/5 text-white/40'
+                      ? 'bg-ink/[0.10] text-ink'
+                      : 'bg-ink/[0.05] text-ink/55'
                   )}
                 >
                   Log Period
@@ -185,7 +185,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
             <div className="flex gap-4 mb-6">
               {mode === 'start' && (
                 <div className="flex-1 glass rounded-2xl p-3 text-center">
-                  <div className="text-[10px] text-white/40 uppercase tracking-wider">Start</div>
+                  <div className="text-[10px] text-ink/55 uppercase tracking-wider">Start</div>
                   <div className="text-sm font-medium mt-1">
                     {start ? nice(ymd(start)) : '—'}
                   </div>
@@ -195,11 +195,11 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
               {mode === 'end' && activeCycle && (
                 <>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider">Started</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">Started</div>
                     <div className="text-sm font-medium mt-1">{nice(activeCycle.start)}</div>
                   </div>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider">End</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">End</div>
                     <div className="text-sm font-medium mt-1">
                       {start ? nice(ymd(start)) : '—'}
                     </div>
@@ -210,13 +210,13 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
               {(mode === 'log' || mode === 'edit') && (
                 <>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider">Start</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">Start</div>
                     <div className="text-sm font-medium mt-1">
                       {start ? nice(ymd(start)) : '—'}
                     </div>
                   </div>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-white/40 uppercase tracking-wider">End</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">End</div>
                     <div className="text-sm font-medium mt-1">
                       {end ? nice(ymd(end)) : '—'}
                     </div>
@@ -239,7 +239,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
             <button
               onClick={handleSave}
               disabled={!canSave}
-              className="w-full py-4 rounded-2xl bg-white text-bg-dark font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+              className="w-full py-4 rounded-2xl bg-accent text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
               {SAVE_LABELS[mode]}
             </button>

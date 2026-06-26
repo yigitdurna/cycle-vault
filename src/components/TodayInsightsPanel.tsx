@@ -18,7 +18,7 @@ export function TodayInsightsPanel({ insights }: TodayInsightsPanelProps) {
 
   return (
     <div className="w-full mt-6">
-      <p className="text-xs text-white/40 uppercase tracking-wider font-medium mb-3">
+      <p className="text-xs text-ink/55 uppercase tracking-wider font-medium mb-3">
         Today
       </p>
       <div className="flex gap-3 flex-wrap">
@@ -33,12 +33,12 @@ export function TodayInsightsPanel({ insights }: TodayInsightsPanelProps) {
               transition={{ delay: i * 0.08 }}
               className="glass rounded-3xl p-4 flex-1 min-w-[140px] flex flex-col gap-2"
             >
-              <div className="w-7 h-7 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-xl bg-ink/[0.05] flex items-center justify-center shrink-0">
                 <Icon size={14} className={config.color} />
               </div>
               <div>
                 <p className="text-xs font-semibold leading-snug">{insight.title}</p>
-                <p className="text-xs text-white/40 mt-0.5 leading-relaxed line-clamp-3">{insight.description}</p>
+                <p className="text-xs text-ink/55 mt-0.5 leading-relaxed line-clamp-3">{insight.description}</p>
               </div>
             </motion.div>
           );

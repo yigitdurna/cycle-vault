@@ -26,15 +26,15 @@ export function PhaseCard({ phaseInfo, subtitle }: PhaseCardProps) {
       className="glass rounded-[2rem] p-6 mt-8 relative overflow-hidden"
     >
       <div className="flex gap-4 items-center relative z-10">
-        <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-ink/[0.07] flex items-center justify-center">
           <Icon size={24} style={{ color: phaseInfo.color }} />
         </div>
         <div>
           <h3 className="text-lg font-semibold">{phaseInfo.name}</h3>
-          <p className="text-sm text-white/50">{subtitle ?? 'Your current phase'}</p>
+          <p className="text-sm text-ink/60">{subtitle ?? 'Your current phase'}</p>
         </div>
       </div>
-      <p className="mt-4 text-white/70 leading-relaxed">
+      <p className="mt-4 text-ink/75 leading-relaxed">
         {phaseInfo.description}
       </p>
 

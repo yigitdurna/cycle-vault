@@ -89,7 +89,7 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
         <PhaseCard phaseInfo={phaseInfoWithPersonalization} subtitle={phaseSubtitle} />
       ) : (
         <div className="glass rounded-[2rem] p-6 mt-8 text-center">
-          <p className="text-white/50">Log your first period with the + button below</p>
+          <p className="text-ink/60">Log your first period with the + button below</p>
         </div>
       )}
     </motion.div>

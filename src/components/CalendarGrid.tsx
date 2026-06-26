@@ -38,28 +38,19 @@ function effectiveType(type: PhaseResult['type'], hideFertility: boolean): Phase
   return type;
 }
 
-function getPhaseClass(phase: PhaseResult | null, hideFertility: boolean): string {
-  if (!phase) return '';
-  switch (effectiveType(phase.type, hideFertility)) {
-    case 'period':
-      return phase.recorded ? 'bg-menstrual/30 text-menstrual' : 'bg-menstrual/15 text-menstrual/70';
-    case 'fertile':
-      return 'bg-follicular/20 text-follicular';
-    case 'ovulation':
-      return 'bg-ovulation/30 text-ovulation';
-    case 'luteal':
-      return 'bg-luteal/20 text-luteal';
-    case 'follicular':
-      return 'bg-follicular/10 text-follicular/70';
-    default:
-      return '';
-  }
+/** Period days get a strong fill (recorded) or a soft fill (predicted). Other
+ *  phases get no fill — only a small dot — to keep the grid clean. */
+function getPeriodFill(phase: PhaseResult | null): string {
+  if (!phase || phase.type !== 'period') return '';
+  return phase.recorded
+    ? 'bg-menstrual text-white font-semibold'
+    : 'bg-menstrual/15 text-menstrual font-medium';
 }
 
+/** Small indicator dot for non-period phases. */
 function getPhaseDot(phase: PhaseResult | null, hideFertility: boolean): string | null {
   if (!phase) return null;
   switch (effectiveType(phase.type, hideFertility)) {
-    case 'period': return 'bg-menstrual';
     case 'fertile': return 'bg-follicular';
     case 'ovulation': return 'bg-ovulation';
     case 'luteal': return 'bg-luteal';
@@ -111,36 +102,38 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10"
+          aria-label="Previous month"
+          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-ink/[0.06] transition-colors"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={18} />
         </button>
-        <span className="text-sm font-semibold uppercase tracking-wider">
+        <span className="text-base font-serif font-bold">
           {format(currentMonth, 'MMMM yyyy')}
         </span>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10"
+          aria-label="Next month"
+          className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-ink/[0.06] transition-colors"
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={18} />
         </button>
       </div>
 
       {/* Day Headers */}
-      <div className="grid grid-cols-7 gap-1 text-center mb-2">
+      <div className="grid grid-cols-7 gap-1.5 text-center mb-2">
         {DAY_HEADERS.map((h, i) => (
-          <div key={i} className="text-[10px] text-white/30 font-bold">{h}</div>
+          <div key={i} className="text-[11px] text-ink/45 font-bold">{h}</div>
         ))}
       </div>
 
       {/* Day Grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1.5">
         {days.map((day, i) => {
           const inMonth = isSameMonth(day, currentMonth);
           const isToday = isSameDay(day, today);
           const dateStr = ymd(day);
           const phase = inMonth ? getPhaseForDate(dateStr) : null;
-          const phaseClass = getPhaseClass(phase, hideFertility);
+          const periodFill = getPeriodFill(phase);
           const dot = getPhaseDot(phase, hideFertility);
           const inRange = isInRange(day);
           const hasSymptom = inMonth && dayLogs && dateStr in dayLogs;
@@ -158,22 +151,22 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
               }}
               disabled={!selectable && !tappable}
               className={cn(
-                'aspect-square rounded-xl flex flex-col items-center justify-center text-sm relative transition-colors',
-                !inMonth && 'opacity-20',
-                inMonth && !isToday && !inRange && phaseClass,
-                isToday && 'bg-white text-bg-dark font-bold',
-                inRange && !isToday && 'bg-white/20 ring-1 ring-white/40',
-                selectable && inMonth && 'hover:bg-white/10 cursor-pointer',
-                tappable && 'cursor-pointer active:bg-white/5',
+                'aspect-square min-h-[42px] rounded-2xl flex flex-col items-center justify-center text-[15px] relative transition-colors',
+                !inMonth && 'opacity-30',
+                inMonth && !inRange && periodFill,
+                inRange && 'bg-ink/15 ring-1 ring-ink/30',
+                isToday && 'ring-2 ring-accent',
+                selectable && inMonth && 'hover:bg-ink/[0.06] cursor-pointer',
+                tappable && 'cursor-pointer active:bg-ink/[0.04]',
               )}
             >
               {format(day, 'd')}
-              {hasSymptom && (
-                <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-accent" />
-              )}
-              {!hasSymptom && dot && !isToday && (
-                <div className={cn('absolute bottom-0.5 w-1 h-1 rounded-full', dot)} />
-              )}
+              {/* Indicators: symptom dot wins; else a small phase dot. */}
+              {hasSymptom ? (
+                <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-accent" />
+              ) : dot && !periodFill ? (
+                <div className={cn('absolute bottom-1 w-1.5 h-1.5 rounded-full', dot)} />
+              ) : null}
             </button>
           );
         })}

@@ -19,7 +19,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', 
           exit={{ opacity: 0 }}
           className="fixed inset-0 z-[100] flex items-center justify-center p-6"
         >
-          <div className="absolute inset-0 bg-black/60" onClick={onCancel} />
+          <div className="absolute inset-0 bg-ink/30 backdrop-blur-sm" onClick={onCancel} />
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -27,11 +27,11 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', 
             className="glass rounded-3xl p-6 w-full max-w-sm relative z-10"
           >
             <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            <p className="text-white/60 text-sm mb-6">{message}</p>
+            <p className="text-ink/65 text-sm mb-6">{message}</p>
             <div className="flex gap-3">
               <button
                 onClick={onCancel}
-                className="flex-1 py-3 rounded-2xl glass text-sm font-medium hover:bg-white/10 transition-colors"
+                className="flex-1 py-3 rounded-2xl glass text-sm font-medium hover:bg-ink/[0.07] transition-colors"
               >
                 Cancel
               </button>

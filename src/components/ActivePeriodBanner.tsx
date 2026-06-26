@@ -26,10 +26,10 @@ export function ActivePeriodBanner({ activeCycle, onEndCycle }: ActivePeriodBann
         </span>
         <div>
           <p className="text-sm font-medium">Period ongoing — Day {dayCount}</p>
-          <p className="text-xs text-white/40">Started {nice(activeCycle.start)}</p>
+          <p className="text-xs text-ink/55">Started {nice(activeCycle.start)}</p>
         </div>
       </div>
-      <span className="text-xs text-white/50 bg-white/5 px-3 py-1.5 rounded-xl">
+      <span className="text-xs text-ink/60 bg-ink/[0.05] px-3 py-1.5 rounded-xl">
         End
       </span>
     </motion.button>

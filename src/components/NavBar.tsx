@@ -29,14 +29,14 @@ function NavButton({ active, onClick, icon: Icon, label }: {
       aria-current={active ? 'page' : undefined}
       className={cn(
         'flex flex-col items-center justify-center w-14 h-14 rounded-full transition-all duration-300',
-        active ? 'text-white' : 'text-white/30 hover:text-white/50'
+        active ? 'text-ink' : 'text-ink/35 hover:text-ink/60'
       )}
     >
       <Icon size={20} />
       {active && (
         <motion.div
           layoutId="nav-dot"
-          className="w-1 h-1 rounded-full bg-white mt-1"
+          className="w-1 h-1 rounded-full bg-ink mt-1"
         />
       )}
     </button>
@@ -63,7 +63,7 @@ export function NavBar({ activeTab, onTabChange, onAdd }: NavBarProps) {
         <button
           onClick={onAdd}
           aria-label="Log a period"
-          className="w-14 h-14 rounded-full bg-white text-bg-dark flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
+          className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
         >
           <Plus size={24} />
         </button>
