@@ -40,9 +40,13 @@ const FILES = [
   'src/hooks/useDayLogs.ts',
   'src/hooks/useSettings.ts',
   'src/views/CalendarView.tsx',
+  'src/views/HomeView.tsx',
   'src/components/CalendarGrid.tsx',
   'src/components/DayDetailSheet.tsx',
+  'src/components/CycleHistoryPanel.tsx',
   'src/views/SettingsView.tsx',
+  'src/lib/notifications.ts',
+  'src/hooks/useNotifications.ts',
 ];
 
 const MAX_BYTES_PER_FILE = 24_000;
