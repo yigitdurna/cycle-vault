@@ -11,21 +11,22 @@ import { CalendarView } from './views/CalendarView';
 import { HistoryView } from './views/HistoryView';
 import { SettingsView } from './views/SettingsView';
 import { LogPeriodSheet } from './components/LogPeriodSheet';
+import { DayDetailSheet } from './components/DayDetailSheet';
 import { useInsights } from './hooks/useInsights';
-import { phaseTypeToUI } from './types';
+import { phaseTypeToUI, PHASES } from './types';
 import type { Cycle, DayLog } from './types';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('home');
+  // Calendar is the most-used view, so it's the landing page.
+  const [activeTab, setActiveTab] = useState<Tab>('calendar');
   const [logSheetOpen, setLogSheetOpen] = useState(false);
   const [editingCycle, setEditingCycle] = useState<Cycle | null>(null);
+  // Day-detail sheet is owned here (not in CalendarView) so the bottom nav can
+  // hide while it's open and day actions can reach the cycle CRUD methods.
+  const [detailDate, setDetailDate] = useState<string | null>(null);
 
   const handleTabChange = (tab: Tab) => {
-    if (tab === activeTab) {
-      setActiveTab('home');
-    } else {
-      setActiveTab(tab);
-    }
+    setActiveTab(tab);
   };
 
   const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility } = useSettings();
@@ -79,6 +80,13 @@ export default function App() {
     const merged = { ...current, ...partial };
     setLog(date, merged);
   };
+
+  // Phase shown in the day-detail sheet header for the selected date.
+  const detailUIPhase = useMemo(() => {
+    if (!detailDate) return PHASES.Follicular;
+    const p = getPhaseForDate(detailDate);
+    return p ? PHASES[phaseTypeToUI(p.type, hideFertility)] : PHASES.Follicular;
+  }, [detailDate, getPhaseForDate, hideFertility]);
 
   const openLogSheet = () => {
     setEditingCycle(null);
@@ -171,7 +179,7 @@ export default function App() {
               cycles={cycles}
               getPhaseForDate={getPhaseForDate}
               dayLogs={allLogs}
-              onUpdateLog={handleUpdateLogForDate}
+              onDayTap={setDetailDate}
               hideFertility={hideFertility}
             />
           )}
@@ -214,7 +222,10 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      <NavBar activeTab={activeTab} onTabChange={handleTabChange} onAdd={openLogSheet} />
+      {/* Hide the floating nav while a sheet is open so they don't overlap. */}
+      {!logSheetOpen && detailDate === null && (
+        <NavBar activeTab={activeTab} onTabChange={handleTabChange} onAdd={openLogSheet} />
+      )}
 
       <LogPeriodSheet
         open={logSheetOpen}
@@ -226,6 +237,19 @@ export default function App() {
           setLogSheetOpen(false);
         }}
         onClose={() => { setLogSheetOpen(false); setEditingCycle(null); }}
+      />
+
+      <DayDetailSheet
+        open={detailDate !== null}
+        date={detailDate ?? ''}
+        log={detailDate ? allLogs[detailDate] : undefined}
+        phaseName={detailUIPhase.name}
+        phaseColor={detailUIPhase.color}
+        activeCycle={activeCycle}
+        onStartPeriod={(d) => { addCycle(d, null); setDetailDate(null); }}
+        onEndPeriod={(d) => { endCycle(d); setDetailDate(null); }}
+        onUpdateLog={handleUpdateLogForDate}
+        onClose={() => setDetailDate(null)}
       />
     </div>
   );
