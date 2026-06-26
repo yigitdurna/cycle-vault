@@ -5,6 +5,7 @@ import { Upload, Trash2, FileJson, FileSpreadsheet, Shield, Share2, RefreshCw, C
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { cn } from '../lib/utils';
 import { requestNotificationPermission } from '../lib/notifications';
+import { loadSampleData } from '../lib/sampleData';
 import type { Cycle, NotificationSettings, LeadDay } from '../types';
 
 const LEAD_DAY_OPTIONS: LeadDay[] = [1, 2, 3, 5, 7];
@@ -326,6 +327,15 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
       <Group title="Danger zone">
         <ActionRow icon={Trash2} label="Clear all data" sub="Permanently delete everything" onClick={() => setClearConfirm(true)} disabled={!hasData} danger />
       </Group>
+
+      {import.meta.env.DEV && (
+        <button
+          onClick={loadSampleData}
+          className="w-full text-center text-xs text-ink/40 underline underline-offset-2 py-1"
+        >
+          Load sample data (dev)
+        </button>
+      )}
 
       <p className="text-center text-xs text-ink/35 pt-2">cycle vault</p>
 

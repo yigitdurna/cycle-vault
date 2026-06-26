@@ -53,7 +53,7 @@ export function CycleHistoryPanel({ cycles }: { cycles: Cycle[] }) {
               {niceShort(c.start)}{c.end ? ` – ${niceShort(c.end)}` : ''}
             </span>
             <span className="text-ink/55 tabular-nums">
-              {c.length ? `${c.length}-day cycle` : 'ongoing'}
+              {c.length ? `${c.length}-day cycle` : 'current'}
             </span>
           </div>
         ))}
