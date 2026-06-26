@@ -6,7 +6,6 @@ import { useDayLogs } from './hooks/useDayLogs';
 import { useSettings } from './hooks/useSettings';
 import { getCycleStats, ymd } from './lib/cycle-math';
 import { NavBar, type Tab } from './components/NavBar';
-import { HomeView } from './views/HomeView';
 import { CalendarView } from './views/CalendarView';
 import { HistoryView } from './views/HistoryView';
 import { SettingsView } from './views/SettingsView';
@@ -61,7 +60,7 @@ export default function App() {
   // "did your period start?" notification starts a period on the predicted day.
   useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null));
 
-  const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
+  const { todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
 
   const handleUpdateLog = (partial: Partial<DayLog>) => {
     const today = ymd(new Date());
@@ -177,38 +176,23 @@ export default function App() {
         </header>
 
         <AnimatePresence mode="wait">
-          {activeTab === 'home' && (
-            <HomeView
-              key="home"
-              todayPhase={todayPhase}
-              todayUIPhase={todayUIPhase}
-              nextPeriod={nextPeriod}
-              cycleDay={cycleDay}
-              cycles={cycles}
-              todayInsights={todayInsights}
-              insights={insights}
-              hasEnoughData={hasEnoughData}
-              getPhaseDescription={getPhaseDescription}
-              customCycleLength={customCycleLength ?? 28}
-              activeCycle={activeCycle}
-              onEndCycle={() => {
-                setEditingCycle(null);
-                setLogSheetOpen(true);
-              }}
-            />
-          )}
-
           {activeTab === 'calendar' && (
             <CalendarView
               key="calendar"
-              cycles={cycles}
               getPhaseForDate={getPhaseForDate}
               dayLogs={allLogs}
               onDayTap={setDetailDate}
               todayLog={todayLog}
               onUpdateTodayLog={handleUpdateLog}
               hideFertility={hideFertility}
-              customCycleLength={customCycleLength ?? 28}
+              activeCycle={activeCycle}
+              onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
+              nextPeriod={nextPeriod}
+              cycleDay={cycleDay}
+              todayUIPhase={todayUIPhase}
+              todayInsights={todayInsights}
+              insights={insights}
+              hasEnoughData={hasEnoughData}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}
