@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import type { Cycle, PhaseResult, DayLogs } from '../types';
 import { phaseTypeToUI } from '../types';
 import {
@@ -41,6 +41,42 @@ function sanitizeCycles(cycles: Cycle[]): Cycle[] {
   return result;
 }
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Parse CSV text into rows of fields. Handles quoted fields, escaped quotes
+ * ("") and commas/newlines inside quotes — so a quoted free-text note can't
+ * desync the columns. Supports both \n and \r\n line endings.
+ */
+function parseCsv(text: string): string[][] {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cur = '';
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { cur += '"'; i++; } else inQuotes = false;
+      } else {
+        cur += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      row.push(cur); cur = '';
+    } else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cur); cur = '';
+      rows.push(row); row = [];
+    } else {
+      cur += ch;
+    }
+  }
+  if (cur.length > 0 || row.length > 0) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
 function loadCycles(): Cycle[] {
   try {
     const raw: Cycle[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -59,6 +95,15 @@ function saveCycles(cycles: Cycle[]) {
 
 export function useCycles(defaultCycleLength = 28) {
   const [cycles, setCycles] = useState<Cycle[]>(loadCycles);
+
+  // Always points at the latest cycles. The async import callbacks below
+  // pre-compute their merge against current state (the FileReader.onload
+  // fires long after the callback was created), so they must read this ref
+  // rather than the `cycles` captured in their closure — otherwise an import
+  // run after the user adds a cycle would merge against a stale snapshot and
+  // drop the newer entry.
+  const cyclesRef = useRef(cycles);
+  cyclesRef.current = cycles;
 
   const persist = useCallback((updater: (prev: Cycle[]) => Cycle[]) => {
     setCycles(prev => {
@@ -134,11 +179,15 @@ export function useCycles(defaultCycleLength = 28) {
     const logDates = Object.keys(dayLogs).sort();
     const hasDayLogs = logDates.length > 0;
 
-    // Properly escape a CSV cell value
-    const esc = (v: string) =>
-      v.includes(',') || v.includes('"') || v.includes('\n')
-        ? '"' + v.replace(/"/g, '""') + '"'
-        : v;
+    // Escape a CSV cell value AND neutralize spreadsheet formula injection:
+    // a cell beginning with = + - @ (or a control char) can execute as a
+    // formula when opened in Excel/Sheets. Prefix those with a single quote.
+    const esc = (v: string) => {
+      const guarded = /^[=+\-@\t\r]/.test(v) ? "'" + v : v;
+      return guarded.includes(',') || guarded.includes('"') || guarded.includes('\n')
+        ? '"' + guarded.replace(/"/g, '""') + '"'
+        : guarded;
+    };
 
     let csvContent: string;
     let filename: string;
@@ -183,16 +232,38 @@ export function useCycles(defaultCycleLength = 28) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
-        const lines = text.split('\n');
-        const startIdx = lines[0].toLowerCase().includes('start') ? 1 : 0;
+        const rows = parseCsv(text);
 
+        // Locate the start/end date columns by header name. This supports both
+        // the simple cycles export (Start Date,End Date) and the richer symptom
+        // export (Date,Period Start,Period End,...) — without the latter being
+        // mis-read as start=Date, end=Period Start (which used to corrupt data).
+        let startIdx = 0;
+        let endIdx = 1;
+        let dataStart = 0;
+        if (rows.length > 0) {
+          const header = rows[0].map(h => h.trim().toLowerCase());
+          const hasHeader = header.some(h => h.includes('start') || h.includes('date'));
+          if (hasHeader) {
+            dataStart = 1;
+            const find = (...names: string[]) => header.findIndex(h => names.includes(h));
+            const s = find('period start', 'start date', 'start');
+            const en = find('period end', 'end date', 'end');
+            if (s !== -1) startIdx = s;
+            if (en !== -1) endIdx = en;
+          }
+        }
+
+        // A symptom CSV repeats the same period start on every logged day, so
+        // dedupe by start as we parse.
         const parsed: Cycle[] = [];
-        for (let i = startIdx; i < lines.length; i++) {
-          const line = lines[i].trim();
-          if (!line) continue;
-          const [start, end] = line.split(',');
-          if (start && /^\d{4}-\d{2}-\d{2}$/.test(start)) {
-            parsed.push({ start, end: end || null });
+        const seenStarts = new Set<string>();
+        for (let i = dataStart; i < rows.length; i++) {
+          const start = (rows[i][startIdx] ?? '').trim();
+          const end = (rows[i][endIdx] ?? '').trim();
+          if (DATE_RE.test(start) && !seenStarts.has(start)) {
+            seenStarts.add(start);
+            parsed.push({ start, end: DATE_RE.test(end) ? end : null });
           }
         }
 
@@ -200,7 +271,7 @@ export function useCycles(defaultCycleLength = 28) {
           // Pre-compute merge using current cycles snapshot so count is
           // ready before resolve() fires (React 18 batches the updater).
           let count = 0;
-          let precomputed: Cycle[] = [...cycles];
+          let precomputed: Cycle[] = [...cyclesRef.current];
           for (const c of parsed) {
             const hadOverlap = precomputed.some(existing => cyclesOverlap(existing, c));
             precomputed = precomputed.filter(existing => !cyclesOverlap(existing, c));
@@ -231,9 +302,9 @@ export function useCycles(defaultCycleLength = 28) {
 
           let count = 0;
           if (importedCycles.length > 0) {
-            let precomputed: Cycle[] = [...cycles];
+            let precomputed: Cycle[] = [...cyclesRef.current];
             for (const c of importedCycles) {
-              if (!c.start || !/^\d{4}-\d{2}-\d{2}$/.test(c.start)) continue;
+              if (!c.start || !DATE_RE.test(c.start)) continue;
               const incoming: Cycle = { start: c.start, end: c.end || null };
               const hadOverlap = precomputed.some(existing => cyclesOverlap(existing, incoming));
               precomputed = precomputed.filter(existing => !cyclesOverlap(existing, incoming));
