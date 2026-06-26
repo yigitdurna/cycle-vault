@@ -26,7 +26,11 @@ export function useSettings() {
   const updateSettings = (patch: Partial<Settings>) => {
     const next = { ...settings, ...patch };
     setSettings(next);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch (e) {
+      console.warn('Failed to persist settings to localStorage', e);
+    }
   };
 
   return {
@@ -35,10 +39,10 @@ export function useSettings() {
       updateSettings({ customCycleLength: v }),
     hideFertility: settings.hideFertility ?? false,
     setHideFertility: (v: boolean) => updateSettings({ hideFertility: v }),
-    notifications: settings.notifications ?? DEFAULT_NOTIFICATION_SETTINGS,
+    notifications: { ...DEFAULT_NOTIFICATION_SETTINGS, ...settings.notifications },
     setNotifications: (patch: Partial<NotificationSettings>) =>
       updateSettings({
-        notifications: { ...(settings.notifications ?? DEFAULT_NOTIFICATION_SETTINGS), ...patch },
+        notifications: { ...DEFAULT_NOTIFICATION_SETTINGS, ...settings.notifications, ...patch },
       }),
   };
 }
