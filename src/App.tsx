@@ -158,8 +158,6 @@ export default function App() {
               nextPeriod={nextPeriod}
               cycleDay={cycleDay}
               cycles={cycles}
-              todayLog={todayLog}
-              onUpdateLog={handleUpdateLog}
               todayInsights={todayInsights}
               insights={insights}
               hasEnoughData={hasEnoughData}
@@ -180,7 +178,11 @@ export default function App() {
               getPhaseForDate={getPhaseForDate}
               dayLogs={allLogs}
               onDayTap={setDetailDate}
+              todayLog={todayLog}
+              onUpdateTodayLog={handleUpdateLog}
+              onLogPeriod={openLogSheet}
               hideFertility={hideFertility}
+              customCycleLength={customCycleLength ?? 28}
             />
           )}
 
@@ -224,7 +226,7 @@ export default function App() {
 
       {/* Hide the floating nav while a sheet is open so they don't overlap. */}
       {!logSheetOpen && detailDate === null && (
-        <NavBar activeTab={activeTab} onTabChange={handleTabChange} onAdd={openLogSheet} />
+        <NavBar activeTab={activeTab} onTabChange={handleTabChange} />
       )}
 
       <LogPeriodSheet

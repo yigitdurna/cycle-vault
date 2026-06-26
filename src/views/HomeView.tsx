@@ -4,11 +4,10 @@ import { CycleRing } from '../components/CycleRing';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
 import { StatCard } from '../components/StatCard';
 import { PhaseCard } from '../components/PhaseCard';
-import { SymptomPills } from '../components/SymptomPills';
 import { TodayInsightsPanel } from '../components/TodayInsightsPanel';
 import { InsightsPanel } from '../components/InsightsPanel';
 import type { PhaseInfo, PhaseResult, Insight, CyclePhase } from '../types';
-import type { Cycle, DayLog } from '../types';
+import type { Cycle } from '../types';
 import { getCycleStats } from '../lib/cycle-math';
 
 interface HomeViewProps {
@@ -17,8 +16,6 @@ interface HomeViewProps {
   nextPeriod: { date: string; daysToNext: number } | null;
   cycleDay: number | null;
   cycles: Cycle[];
-  todayLog: DayLog | undefined;
-  onUpdateLog: (log: Partial<DayLog>) => void;
   todayInsights: Insight[];
   insights: Insight[];
   hasEnoughData: boolean;
@@ -28,7 +25,7 @@ interface HomeViewProps {
   onEndCycle: () => void;
 }
 
-export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycles, todayLog, onUpdateLog, todayInsights, insights, hasEnoughData, getPhaseDescription, customCycleLength, activeCycle, onEndCycle }: HomeViewProps) {
+export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycles, todayInsights, insights, hasEnoughData, getPhaseDescription, customCycleLength, activeCycle, onEndCycle }: HomeViewProps) {
   const stats = getCycleStats(cycles, customCycleLength);
   const totalDays = stats?.med ?? customCycleLength;
   const displayDay = cycleDay ?? 1;
@@ -78,10 +75,6 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
       )}
 
       {hasCycles && (
-        <SymptomPills log={todayLog} onUpdate={onUpdateLog} />
-      )}
-
-      {hasCycles && (
         <InsightsPanel insights={insights} hasEnoughData={hasEnoughData} />
       )}
 
@@ -89,7 +82,7 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
         <PhaseCard phaseInfo={phaseInfoWithPersonalization} subtitle={phaseSubtitle} />
       ) : (
         <div className="glass rounded-[2rem] p-6 mt-8 text-center">
-          <p className="text-ink/60">Log your first period with the + button below</p>
+          <p className="text-ink/60">Head to the Calendar to log your first period.</p>
         </div>
       )}
     </motion.div>

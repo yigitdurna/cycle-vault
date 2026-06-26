@@ -1,10 +1,9 @@
 import { motion } from 'motion/react';
 import {
-  Home as HomeIcon,
   Calendar as CalendarIcon,
+  LayoutDashboard,
   History as HistoryIcon,
   Settings,
-  Plus,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -13,7 +12,6 @@ export type Tab = 'home' | 'calendar' | 'history' | 'settings';
 interface NavBarProps {
   activeTab: Tab;
   onTabChange: (tab: Tab) => void;
-  onAdd: () => void;
 }
 
 function NavButton({ active, onClick, icon: Icon, label }: {
@@ -43,31 +41,22 @@ function NavButton({ active, onClick, icon: Icon, label }: {
   );
 }
 
-export function NavBar({ activeTab, onTabChange, onAdd }: NavBarProps) {
+export function NavBar({ activeTab, onTabChange }: NavBarProps) {
   return (
     <nav className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
-      <div className="glass-dark rounded-[2.5rem] p-2 flex items-center justify-between shadow-2xl">
-        <NavButton
-          active={activeTab === 'home'}
-          onClick={() => onTabChange('home')}
-          icon={HomeIcon}
-          label="Home"
-        />
+      <div className="glass-dark rounded-[2.5rem] p-2 flex items-center justify-around shadow-2xl">
         <NavButton
           active={activeTab === 'calendar'}
           onClick={() => onTabChange('calendar')}
           icon={CalendarIcon}
           label="Calendar"
         />
-
-        <button
-          onClick={onAdd}
-          aria-label="Log a period"
-          className="w-14 h-14 rounded-full bg-accent text-white flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-        >
-          <Plus size={24} />
-        </button>
-
+        <NavButton
+          active={activeTab === 'home'}
+          onClick={() => onTabChange('home')}
+          icon={LayoutDashboard}
+          label="Dashboard"
+        />
         <NavButton
           active={activeTab === 'history'}
           onClick={() => onTabChange('history')}

@@ -44,7 +44,7 @@ function getPeriodFill(phase: PhaseResult | null): string {
   if (!phase || phase.type !== 'period') return '';
   return phase.recorded
     ? 'bg-menstrual text-white font-semibold'
-    : 'bg-menstrual/15 text-menstrual font-medium';
+    : 'bg-menstrual/25 text-menstrual font-semibold';
 }
 
 /** Small indicator dot for non-period phases. */
@@ -163,9 +163,9 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
               {format(day, 'd')}
               {/* Indicators: symptom dot wins; else a small phase dot. */}
               {hasSymptom ? (
-                <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-accent" />
+                <div className="absolute bottom-1 w-2 h-2 rounded-full bg-accent" />
               ) : dot && !periodFill ? (
-                <div className={cn('absolute bottom-1 w-1.5 h-1.5 rounded-full', dot)} />
+                <div className={cn('absolute bottom-1 w-2 h-2 rounded-full', dot)} />
               ) : null}
             </button>
           );
