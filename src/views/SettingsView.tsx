@@ -6,9 +6,11 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { cn } from '../lib/utils';
 import { requestNotificationPermission } from '../lib/notifications';
 import { loadSampleData } from '../lib/sampleData';
+import { useTranslation, LOCALE_LABELS, type Locale } from '../i18n';
 import type { Cycle, NotificationSettings, LeadDay } from '../types';
 
 const LEAD_DAY_OPTIONS: LeadDay[] = [1, 2, 3, 5, 7];
+const LOCALE_OPTIONS: Locale[] = ['en', 'tr', 'de'];
 
 /** Section: small label + a card of compact rows with hairline dividers. */
 function Group({ title, children }: { title?: string; children: React.ReactNode }) {
@@ -98,9 +100,12 @@ interface SettingsViewProps {
   hasData: boolean;
   notifications: NotificationSettings;
   onSetNotifications: (patch: Partial<NotificationSettings>) => void;
+  locale: Locale;
+  onSetLocale: (l: Locale) => void;
 }
 
-export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength, hideFertility, onSetHideFertility, hasData, notifications, onSetNotifications }: SettingsViewProps) {
+export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, onImportJSON, onClearAll, shareSummary, customCycleLength, onSetCycleLength, computedCycleLength, hideFertility, onSetHideFertility, hasData, notifications, onSetNotifications, locale, onSetLocale }: SettingsViewProps) {
+  const { t } = useTranslation();
   const [clearConfirm, setClearConfirm] = useState(false);
   const [importMsg, setImportMsg] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -140,7 +145,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
     if (!on) { onSetNotifications({ enabled: false }); return; }
     const granted = await requestNotificationPermission();
     if (granted) { onSetNotifications({ enabled: true }); setNotifMsg(null); }
-    else { setNotifMsg('Reminders need the installed app with notifications allowed (iOS Settings → cycle vault → Notifications).'); }
+    else { setNotifMsg(t('settings.notifPermissionHint')); }
   };
 
   const toggleLeadDay = (d: LeadDay) => {
@@ -154,7 +159,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
     const file = e.target.files?.[0];
     if (!file) return;
     const count = await onImportCSV(file);
-    setImportMsg(count > 0 ? `Imported ${count} cycle${count > 1 ? 's' : ''}` : 'No new cycles found');
+    setImportMsg(count > 0 ? t('settings.importedCycles', { count }) : t('settings.noNewCycles'));
     setTimeout(() => setImportMsg(null), 3000);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -165,7 +170,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
       try { await navigator.share({ text: shareSummary }); } catch { /* cancelled */ }
     } else {
       await navigator.clipboard.writeText(shareSummary);
-      setImportMsg('Summary copied to clipboard');
+      setImportMsg(t('settings.summaryCopied'));
       setTimeout(() => setImportMsg(null), 3000);
     }
   };
@@ -177,24 +182,41 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
       exit={{ opacity: 0, x: -20 }}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-serif font-bold">Settings</h2>
+      <h2 className="text-3xl font-serif font-bold">{t('settings.title')}</h2>
 
       {/* Privacy — slim line */}
       <div className="glass rounded-2xl px-4 py-3 flex items-center gap-3 border border-follicular/15">
         <Shield size={18} className="text-follicular shrink-0" />
         <p className="text-xs text-ink/65">
-          Everything stays on your device. No accounts, no cloud, no tracking.
+          {t('settings.privacyBannerShort')}
         </p>
       </div>
 
       {/* Preferences */}
-      <Group title="Preferences">
+      <Group title={t('settings.sectionPreferences')}>
+        {/* Language */}
+        <div className="px-4 py-3 flex items-center justify-between gap-4">
+          <div className="text-sm font-medium">{t('settings.language')}</div>
+          <div className="flex gap-1.5 shrink-0">
+            {LOCALE_OPTIONS.map(l => (
+              <button
+                key={l}
+                onClick={() => onSetLocale(l)}
+                aria-pressed={locale === l}
+                className={cn('px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  locale === l ? 'bg-accent text-white border-accent' : 'bg-ink/[0.05] text-ink/60 border-ink/[0.08]')}
+              >
+                {LOCALE_LABELS[l]}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="px-4 py-3 space-y-3">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-medium">Average cycle length</div>
+              <div className="text-sm font-medium">{t('settings.avgCycleLength')}</div>
               <div className="text-xs text-ink/55 mt-0.5">
-                {computedCycleLength ? `From your data: ${computedCycleLength} days` : 'Used until enough cycles are logged'}
+                {computedCycleLength ? t('settings.computedFromData', { count: computedCycleLength }) : t('settings.usedUntilEnough')}
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -206,48 +228,48 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                 placeholder="28"
                 className="w-14 bg-ink/[0.05] border border-ink/[0.08] rounded-xl px-2 py-1.5 text-sm text-center text-ink/80 focus:outline-none focus:border-accent/40"
               />
-              <span className="text-xs text-ink/55">days</span>
+              <span className="text-xs text-ink/55">{t('settings.daysUnit')}</span>
             </div>
           </div>
           <AnimatePresence mode="wait">
             {cycleSaved ? (
               <motion.div key="saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex items-center gap-1.5 text-accent text-xs font-medium">
-                <Check size={13} /> Saved
+                <Check size={13} /> {t('common.saved')}
               </motion.div>
             ) : isCycleDirty ? (
               <motion.button key="save" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
                 onClick={saveCycleLength}
                 className="px-4 py-1.5 rounded-full bg-accent text-white text-xs font-medium hover:opacity-90 transition-opacity">
-                Save
+                {t('common.save')}
               </motion.button>
             ) : customCycleLength ? (
               <button onClick={() => { onSetCycleLength(undefined); setCycleLengthInput(''); }}
                 className="flex items-center gap-1.5 text-xs text-ink/45 hover:text-ink/65 transition-colors">
-                <RefreshCw size={12} /> Reset to default (28)
+                <RefreshCw size={12} /> {t('settings.resetToDefault')}
               </button>
             ) : null}
           </AnimatePresence>
         </div>
         <div className="px-4 py-3 flex items-center justify-between gap-4">
           <div>
-            <div className="text-sm font-medium">Hide fertility &amp; ovulation</div>
-            <div className="text-xs text-ink/55 mt-0.5">For when you&apos;re not trying to conceive.</div>
+            <div className="text-sm font-medium">{t('settings.hideFertilityTitle')}</div>
+            <div className="text-xs text-ink/55 mt-0.5">{t('settings.hideFertilityShort')}</div>
           </div>
-          <Toggle checked={hideFertility} onChange={onSetHideFertility} label="Hide fertility and ovulation" />
+          <Toggle checked={hideFertility} onChange={onSetHideFertility} label={t('settings.hideFertilityAria')} />
         </div>
       </Group>
 
       {/* Reminders */}
       <div className="space-y-2">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-ink/45 px-1">Reminders</h3>
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-ink/45 px-1">{t('settings.sectionReminders')}</h3>
         <div className="glass rounded-3xl p-4 space-y-4">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <div className="text-sm font-medium flex items-center gap-2"><Bell size={15} /> Notifications</div>
-              <div className="text-xs text-ink/55 mt-0.5">On-device only. Nothing leaves your phone.</div>
+              <div className="text-sm font-medium flex items-center gap-2"><Bell size={15} /> {t('settings.notifications')}</div>
+              <div className="text-xs text-ink/55 mt-0.5">{t('settings.notifOnDevice')}</div>
             </div>
-            <Toggle checked={notifications.enabled} onChange={handleEnableNotifications} label="Enable notifications" />
+            <Toggle checked={notifications.enabled} onChange={handleEnableNotifications} label={t('settings.enableNotifAria')} />
           </div>
 
           {notifMsg && <p className="text-xs text-menstrual">{notifMsg}</p>}
@@ -255,7 +277,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
           {notifications.enabled && (
             <div className="space-y-5 pt-1">
               <div className="flex items-center justify-between gap-4">
-                <div className="text-sm font-medium">Reminder time</div>
+                <div className="text-sm font-medium">{t('settings.reminderTime')}</div>
                 <input
                   type="time" value={timeInput}
                   onChange={e => setTimeInput(e.target.value)}
@@ -264,8 +286,8 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                 />
               </div>
 
-              <ReminderGroup label="Before your period">
-                <Row label="Upcoming period" checked={notifications.upcomingPeriod} onChange={v => onSetNotifications({ upcomingPeriod: v })} />
+              <ReminderGroup label={t('settings.groupBefore')}>
+                <Row label={t('settings.reminderUpcoming')} checked={notifications.upcomingPeriod} onChange={v => onSetNotifications({ upcomingPeriod: v })} />
                 {notifications.upcomingPeriod && (
                   <div className="flex flex-wrap gap-2">
                     {LEAD_DAY_OPTIONS.map(d => {
@@ -274,33 +296,33 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
                         <button key={d} onClick={() => toggleLeadDay(d)}
                           className={cn('px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
                             on ? 'bg-accent text-white border-accent' : 'bg-ink/[0.05] text-ink/60 border-ink/[0.08]')}>
-                          {d}d before
+                          {t('settings.leadDayBefore', { count: d })}
                         </button>
                       );
                     })}
                   </div>
                 )}
-                <Row label="Period start day" checked={notifications.periodStartDay} onChange={v => onSetNotifications({ periodStartDay: v })} />
+                <Row label={t('settings.reminderStartDay')} checked={notifications.periodStartDay} onChange={v => onSetNotifications({ periodStartDay: v })} />
               </ReminderGroup>
 
-              <ReminderGroup label="During your period">
-                <Row label="Did your period start?" checked={notifications.periodStartConfirm} onChange={v => onSetNotifications({ periodStartConfirm: v })} />
-                <Row label="Daily symptom reminder" checked={notifications.duringPeriod} onChange={v => onSetNotifications({ duringPeriod: v })} />
+              <ReminderGroup label={t('settings.groupDuring')}>
+                <Row label={t('settings.reminderStartConfirm')} checked={notifications.periodStartConfirm} onChange={v => onSetNotifications({ periodStartConfirm: v })} />
+                <Row label={t('settings.reminderDaily')} checked={notifications.duringPeriod} onChange={v => onSetNotifications({ duringPeriod: v })} />
               </ReminderGroup>
 
-              <ReminderGroup label="After your period">
-                <Row label="Did it end? (log it)" checked={notifications.periodEndConfirm} onChange={v => onSetNotifications({ periodEndConfirm: v })} />
+              <ReminderGroup label={t('settings.groupAfter')}>
+                <Row label={t('settings.reminderEndConfirm')} checked={notifications.periodEndConfirm} onChange={v => onSetNotifications({ periodEndConfirm: v })} />
               </ReminderGroup>
 
               {!hideFertility && (
-                <ReminderGroup label="Fertility">
-                  <Row label="Ovulation day" checked={notifications.ovulation} onChange={v => onSetNotifications({ ovulation: v })} />
-                  <Row label="Fertile window start" checked={notifications.fertileWindow} onChange={v => onSetNotifications({ fertileWindow: v })} />
+                <ReminderGroup label={t('settings.groupFertility')}>
+                  <Row label={t('settings.reminderOvulation')} checked={notifications.ovulation} onChange={v => onSetNotifications({ ovulation: v })} />
+                  <Row label={t('settings.reminderFertile')} checked={notifications.fertileWindow} onChange={v => onSetNotifications({ fertileWindow: v })} />
                 </ReminderGroup>
               )}
 
-              <ReminderGroup label="Tips">
-                <Row label="Phase wellness tips" checked={notifications.wellnessTips} onChange={v => onSetNotifications({ wellnessTips: v })} />
+              <ReminderGroup label={t('settings.groupTips')}>
+                <Row label={t('settings.reminderWellness')} checked={notifications.wellnessTips} onChange={v => onSetNotifications({ wellnessTips: v })} />
               </ReminderGroup>
             </div>
           )}
@@ -308,24 +330,24 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
       </div>
 
       {/* Data & backup */}
-      <Group title={`Data & backup · ${cycles.length} ${cycles.length === 1 ? 'cycle' : 'cycles'}`}>
-        <ActionRow icon={FileJson} label="Export as JSON" sub="Full backup — symptoms, notes & history" onClick={onExportJSON} disabled={!hasData} />
-        <ActionRow icon={FileSpreadsheet} label="Export as CSV" sub="Opens in Excel / Sheets" onClick={onExportCSV} disabled={!hasData} />
-        <ActionRow icon={FileJson} label="Import JSON" sub="Restore from a backup" onClick={() => jsonInputRef.current?.click()} />
-        <ActionRow icon={Upload} label="Import CSV" sub="Add cycles from a CSV" onClick={() => fileInputRef.current?.click()} />
-        {shareSummary && <ActionRow icon={Share2} label="Share summary" sub="Current cycle status" onClick={handleShare} />}
+      <Group title={`${t('settings.sectionDataBackup')} · ${t('settings.cyclesShort', { count: cycles.length })}`}>
+        <ActionRow icon={FileJson} label={t('settings.exportJsonTitle')} sub={t('settings.exportJsonBody')} onClick={onExportJSON} disabled={!hasData} />
+        <ActionRow icon={FileSpreadsheet} label={t('settings.exportCsvTitle')} sub={t('settings.exportCsvBody')} onClick={onExportCSV} disabled={!hasData} />
+        <ActionRow icon={FileJson} label={t('settings.importJsonTitle')} sub={t('settings.importJsonBody')} onClick={() => jsonInputRef.current?.click()} />
+        <ActionRow icon={Upload} label={t('settings.importCsvTitle')} sub={t('settings.importCsvBody')} onClick={() => fileInputRef.current?.click()} />
+        {shareSummary && <ActionRow icon={Share2} label={t('settings.shareSummaryTitle')} sub={t('settings.shareSummaryBody')} onClick={handleShare} />}
       </Group>
       {importMsg && <p className="text-sm text-follicular text-center -mt-3">{importMsg}</p>}
 
       {/* Legal */}
-      <Group title="Privacy & legal">
-        <ActionRow icon={Shield} label="Privacy Policy" sub="Your data never leaves your device" href={import.meta.env.BASE_URL + 'privacy.html'} />
-        <ActionRow icon={FileText} label="Terms & Medical Disclaimer" sub="Not medical advice; not for contraception" href={import.meta.env.BASE_URL + 'terms.html'} />
+      <Group title={t('settings.sectionLegal')}>
+        <ActionRow icon={Shield} label={t('settings.privacyPolicyTitle')} sub={t('settings.privacyPolicyBody')} href={import.meta.env.BASE_URL + 'privacy.html'} />
+        <ActionRow icon={FileText} label={t('settings.termsTitle')} sub={t('settings.termsBody')} href={import.meta.env.BASE_URL + 'terms.html'} />
       </Group>
 
       {/* Danger zone */}
-      <Group title="Danger zone">
-        <ActionRow icon={Trash2} label="Clear all data" sub="Permanently delete everything" onClick={() => setClearConfirm(true)} disabled={!hasData} danger />
+      <Group title={t('settings.sectionDanger')}>
+        <ActionRow icon={Trash2} label={t('settings.clearAllTitle')} sub={t('settings.clearAllBody')} onClick={() => setClearConfirm(true)} disabled={!hasData} danger />
       </Group>
 
       {import.meta.env.DEV && (
@@ -333,7 +355,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
           onClick={loadSampleData}
           className="w-full text-center text-xs text-ink/40 underline underline-offset-2 py-1"
         >
-          Load sample data (dev)
+          {t('settings.loadSampleData')}
         </button>
       )}
 
@@ -345,7 +367,7 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
           const file = e.target.files?.[0];
           if (!file) return;
           const count = await onImportJSON(file);
-          setImportMsg(count > 0 ? `Imported ${count} cycle${count > 1 ? 's' : ''} with symptoms` : 'No new cycles found');
+          setImportMsg(count > 0 ? t('settings.importedCyclesWithSymptoms', { count }) : t('settings.noNewCycles'));
           setTimeout(() => setImportMsg(null), 3000);
           if (jsonInputRef.current) jsonInputRef.current.value = '';
         }}
@@ -354,9 +376,9 @@ export function SettingsView({ cycles, onExportJSON, onExportCSV, onImportCSV, o
 
       <ConfirmDialog
         open={clearConfirm}
-        title="Clear All Data"
-        message="This will permanently delete all your cycle data. This cannot be undone."
-        confirmLabel="Delete Everything"
+        title={t('settings.clearConfirmTitle')}
+        message={t('settings.clearConfirmMessage')}
+        confirmLabel={t('settings.clearConfirmButton')}
         onConfirm={() => { onClearAll(); setClearConfirm(false); }}
         onCancel={() => setClearConfirm(false)}
       />

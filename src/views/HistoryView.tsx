@@ -4,6 +4,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { nice, diff, fromYmd } from '../lib/cycle-math';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../i18n';
 import type { Cycle } from '../types';
 
 interface HistoryViewProps {
@@ -14,6 +15,7 @@ interface HistoryViewProps {
 
 export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const { t, locale } = useTranslation();
 
   const sorted = [...cycles].sort((a, b) => b.start.localeCompare(a.start));
 
@@ -24,18 +26,18 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
       exit={{ opacity: 0, x: -20 }}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-serif font-bold">History</h2>
+      <h2 className="text-3xl font-serif font-bold">{t('history.title')}</h2>
 
       {sorted.length === 0 ? (
         <div className="glass rounded-[2rem] p-6 text-center">
-          <p className="text-ink/60">No cycles logged yet</p>
-          <p className="text-ink/45 text-sm mt-1">Use the + button to log your first period</p>
+          <p className="text-ink/60">{t('history.emptyTitle')}</p>
+          <p className="text-ink/45 text-sm mt-1">{t('history.emptySubtitle')}</p>
         </div>
       ) : (
         <div className="space-y-3">
           {sorted.map((cycle) => {
             const startDate = fromYmd(cycle.start);
-            const month = startDate.toLocaleDateString(undefined, { month: 'long' });
+            const month = startDate.toLocaleDateString(locale, { month: 'long' });
             const duration = cycle.end ? diff(cycle.end, cycle.start) + 1 : null;
             const isActive = cycle.end === null;
 
@@ -48,12 +50,12 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
                   <p className="font-semibold text-lg">
                     {month}
                     {isActive && (
-                      <span className="ml-2 text-xs font-normal text-menstrual">Ongoing</span>
+                      <span className="ml-2 text-xs font-normal text-menstrual">{t('history.ongoing')}</span>
                     )}
                   </p>
                   <p className="text-xs text-ink/55">
-                    Started {nice(cycle.start)}
-                    {duration && ` · ${duration} days`}
+                    {t('history.started', { date: nice(cycle.start, locale) })}
+                    {duration && ` · ${t('history.duration', { count: duration })}`}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -78,9 +80,9 @@ export function HistoryView({ cycles, onEdit, onDelete }: HistoryViewProps) {
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title="Delete Cycle"
-        message="This will permanently remove this cycle from your history."
-        confirmLabel="Delete"
+        title={t('history.deleteTitle')}
+        message={t('history.deleteMessage')}
+        confirmLabel={t('history.deleteConfirm')}
         onConfirm={() => {
           if (deleteTarget) onDelete(deleteTarget);
           setDeleteTarget(null);

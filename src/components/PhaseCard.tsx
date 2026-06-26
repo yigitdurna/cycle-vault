@@ -2,13 +2,16 @@ import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Droplets, Sparkles, Zap, Moon } from 'lucide-react';
 import type { PhaseInfo } from '../types';
+import { useTranslation, phaseName, phaseKey } from '../i18n';
 
 interface PhaseCardProps {
   phaseInfo: PhaseInfo;
   subtitle?: string;
+  description?: string;
 }
 
-export function PhaseCard({ phaseInfo, subtitle }: PhaseCardProps) {
+export function PhaseCard({ phaseInfo, subtitle, description }: PhaseCardProps) {
+  const { t } = useTranslation();
   const Icon = useMemo(() => {
     switch (phaseInfo.name) {
       case 'Menstrual': return Droplets;
@@ -30,12 +33,12 @@ export function PhaseCard({ phaseInfo, subtitle }: PhaseCardProps) {
           <Icon size={24} style={{ color: phaseInfo.color }} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">{phaseInfo.name}</h3>
-          <p className="text-sm text-ink/60">{subtitle ?? 'Your current phase'}</p>
+          <h3 className="text-lg font-semibold">{phaseName(t, phaseInfo.name)}</h3>
+          <p className="text-sm text-ink/60">{subtitle ?? t('home.currentPhase')}</p>
         </div>
       </div>
       <p className="mt-4 text-ink/75 leading-relaxed">
-        {phaseInfo.description}
+        {description ?? t(`phases.${phaseKey(phaseInfo.name)}Desc`)}
       </p>
 
       {/* Decorative Gradient */}

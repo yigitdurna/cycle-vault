@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Smile, Zap, Flame, Droplets, Activity, MessageSquare, Check, X } from 'lucide-react';
 import type { DayLog, MoodValue, Severity, FlowLevel } from '../types';
+import { useTranslation } from '../i18n';
 
 interface SymptomPillsProps {
   log: DayLog | undefined;
@@ -10,36 +11,50 @@ interface SymptomPillsProps {
 
 type PopoverId = 'mood' | 'energy' | 'cramps' | 'flow' | 'pain' | null;
 
-const MOODS: { value: MoodValue; label: string }[] = [
-  { value: 'anxious', label: 'Anxious' },
-  { value: 'sad', label: 'Sad' },
-  { value: 'irritable', label: 'Irritable' },
-  { value: 'energetic', label: 'Energetic' },
-  { value: 'calm', label: 'Calm' },
-  { value: 'happy', label: 'Happy' },
+const MOODS: { value: MoodValue }[] = [
+  { value: 'anxious' },
+  { value: 'sad' },
+  { value: 'irritable' },
+  { value: 'energetic' },
+  { value: 'calm' },
+  { value: 'happy' },
 ];
 
-const FLOW_LEVELS: { value: FlowLevel; label: string }[] = [
-  { value: 'spotting', label: 'Spotting' },
-  { value: 'light', label: 'Light' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'heavy', label: 'Heavy' },
+const FLOW_LEVELS: { value: FlowLevel; labelKey: string }[] = [
+  { value: 'spotting', labelKey: 'flowSpotting' },
+  { value: 'light', labelKey: 'flowLight' },
+  { value: 'medium', labelKey: 'flowMedium' },
+  { value: 'heavy', labelKey: 'flowHeavy' },
 ];
 
-const ENERGY_LEVELS: { value: Severity; label: string }[] = [
-  { value: 1, label: 'Low' },
-  { value: 2, label: 'Moderate' },
-  { value: 3, label: 'High' },
+const ENERGY_LEVELS: { value: Severity; labelKey: string }[] = [
+  { value: 1, labelKey: 'energyLow' },
+  { value: 2, labelKey: 'energyModerate' },
+  { value: 3, labelKey: 'energyHigh' },
 ];
 
-const CRAMPS_LEVELS: { value: Severity; label: string }[] = [
-  { value: 1, label: 'Mild' },
-  { value: 2, label: 'Moderate' },
-  { value: 3, label: 'Severe' },
+const CRAMPS_LEVELS: { value: Severity; labelKey: string }[] = [
+  { value: 1, labelKey: 'severityMild' },
+  { value: 2, labelKey: 'severityModerate' },
+  { value: 3, labelKey: 'severitySevere' },
 ];
 
 const PAIN_LOCATIONS = ['head', 'breast', 'back', 'joints'] as const;
-const SEVERITY_LABELS: Record<Severity, string> = { 1: 'Mild', 2: 'Moderate', 3: 'Severe' };
+const PAIN_LOCATION_KEYS: Record<typeof PAIN_LOCATIONS[number], string> = {
+  head: 'painHead',
+  breast: 'painBreast',
+  back: 'painBack',
+  joints: 'painJoints',
+};
+const SEVERITY_KEYS: Record<Severity, string> = { 1: 'severityMild', 2: 'severityModerate', 3: 'severitySevere' };
+const MOOD_KEYS: Record<MoodValue, string> = {
+  anxious: 'moodAnxious',
+  sad: 'moodSad',
+  irritable: 'moodIrritable',
+  energetic: 'moodEnergetic',
+  calm: 'moodCalm',
+  happy: 'moodHappy',
+};
 
 function Pill({
   icon: Icon,
@@ -119,6 +134,7 @@ function OptionButton({ label, active, onClick }: { label: string; active: boole
 }
 
 export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
+  const { t } = useTranslation();
   const [openPopover, setOpenPopover] = useState<PopoverId>(null);
   const [noteOpen, setNoteOpen] = useState(false);
   const [noteText, setNoteText] = useState('');
@@ -206,29 +222,29 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
   };
 
 
-  const energyLabel = draft.energy ? ['Low', 'Moderate', 'High'][draft.energy - 1] : 'Energy';
-  const crampsLabel = draft.cramps ? ['Mild', 'Moderate', 'Severe'][draft.cramps - 1] : 'Cramps';
+  const energyLabel = draft.energy ? t(`symptoms.${ENERGY_LEVELS[draft.energy - 1].labelKey}`) : t('symptoms.energy');
+  const crampsLabel = draft.cramps ? t(`symptoms.${CRAMPS_LEVELS[draft.cramps - 1].labelKey}`) : t('symptoms.cramps');
 
   return (
     <div className="w-full mt-8">
       <p className="text-sm text-ink/45 font-serif italic mb-4">
-        How are you feeling today?
+        {t('symptoms.howFeeling')}
       </p>
 
       {/* Pill row */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
-        <Pill icon={Smile} label="Mood" active={!!draft.mood?.length} onClick={() => toggle('mood')} />
+        <Pill icon={Smile} label={t('symptoms.mood')} active={!!draft.mood?.length} onClick={() => toggle('mood')} />
         <Pill icon={Zap} label={energyLabel} active={!!draft.energy} onClick={() => toggle('energy')} />
         <Pill icon={Flame} label={crampsLabel} active={!!draft.cramps} onClick={() => toggle('cramps')} />
-        <Pill icon={Droplets} label="Flow" active={!!draft.flow} onClick={() => toggle('flow')} />
-        <Pill icon={Activity} label="Pain" active={!!draft.pain} onClick={() => toggle('pain')} />
+        <Pill icon={Droplets} label={t('symptoms.flow')} active={!!draft.flow} onClick={() => toggle('flow')} />
+        <Pill icon={Activity} label={t('symptoms.pain')} active={!!draft.pain} onClick={() => toggle('pain')} />
       </div>
 
       {/* Mood popover */}
       <Popover open={openPopover === 'mood'} onClose={() => setOpenPopover(null)}>
         <div className="flex flex-wrap gap-2">
           {MOODS.map(m => (
-            <OptionButton key={m.value} label={m.label} active={draft.mood?.includes(m.value) ?? false} onClick={() => toggleMood(m.value)} />
+            <OptionButton key={m.value} label={t(`symptoms.${MOOD_KEYS[m.value]}`)} active={draft.mood?.includes(m.value) ?? false} onClick={() => toggleMood(m.value)} />
           ))}
         </div>
       </Popover>
@@ -237,7 +253,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
       <Popover open={openPopover === 'energy'} onClose={() => setOpenPopover(null)}>
         <div className="flex flex-wrap gap-2">
           {ENERGY_LEVELS.map(e => (
-            <OptionButton key={e.value} label={e.label} active={draft.energy === e.value} onClick={() => selectEnergy(e.value)} />
+            <OptionButton key={e.value} label={t(`symptoms.${e.labelKey}`)} active={draft.energy === e.value} onClick={() => selectEnergy(e.value)} />
           ))}
         </div>
       </Popover>
@@ -246,7 +262,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
       <Popover open={openPopover === 'cramps'} onClose={() => setOpenPopover(null)}>
         <div className="flex flex-wrap gap-2">
           {CRAMPS_LEVELS.map(c => (
-            <OptionButton key={c.value} label={c.label} active={draft.cramps === c.value} onClick={() => selectCramps(c.value)} />
+            <OptionButton key={c.value} label={t(`symptoms.${c.labelKey}`)} active={draft.cramps === c.value} onClick={() => selectCramps(c.value)} />
           ))}
         </div>
       </Popover>
@@ -255,25 +271,25 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
       <Popover open={openPopover === 'flow'} onClose={() => setOpenPopover(null)}>
         <div className="flex flex-wrap gap-2">
           {FLOW_LEVELS.map(f => (
-            <OptionButton key={f.value} label={f.label} active={draft.flow === f.value} onClick={() => selectFlow(f.value)} />
+            <OptionButton key={f.value} label={t(`symptoms.${f.labelKey}`)} active={draft.flow === f.value} onClick={() => selectFlow(f.value)} />
           ))}
         </div>
       </Popover>
 
       {/* Pain popover */}
       <Popover open={openPopover === 'pain'} onClose={() => setOpenPopover(null)}>
-        <p className="text-xs text-ink/55 mb-2">Location</p>
+        <p className="text-xs text-ink/55 mb-2">{t('symptoms.locationLabel')}</p>
         <div className="flex flex-wrap gap-2 mb-3">
           {PAIN_LOCATIONS.map(loc => (
-            <OptionButton key={loc} label={loc.charAt(0).toUpperCase() + loc.slice(1)} active={draft.pain?.locations.includes(loc) ?? false} onClick={() => togglePainLocation(loc)} />
+            <OptionButton key={loc} label={t(`symptoms.${PAIN_LOCATION_KEYS[loc]}`)} active={draft.pain?.locations.includes(loc) ?? false} onClick={() => togglePainLocation(loc)} />
           ))}
         </div>
         {draft.pain && draft.pain.locations.length > 0 && (
           <>
-            <p className="text-xs text-ink/55 mb-2">Severity</p>
+            <p className="text-xs text-ink/55 mb-2">{t('symptoms.severityLabel')}</p>
             <div className="flex gap-2">
               {([1, 2, 3] as Severity[]).map(s => (
-                <OptionButton key={s} label={SEVERITY_LABELS[s]} active={draft.pain?.severity === s} onClick={() => setPainSeverity(s)} />
+                <OptionButton key={s} label={t(`symptoms.${SEVERITY_KEYS[s]}`)} active={draft.pain?.severity === s} onClick={() => setPainSeverity(s)} />
               ))}
             </div>
           </>
@@ -282,10 +298,10 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
 
       {/* Functional impact */}
       <div className="flex items-center justify-between mt-4">
-        <p className="text-xs text-ink/55">Symptoms affected your day?</p>
+        <p className="text-xs text-ink/55">{t('symptoms.impactQuestion')}</p>
         <div className="flex gap-2">
-          <OptionButton label="Yes" active={draft.functionalImpact === true} onClick={() => setImpact(true)} />
-          <OptionButton label="No" active={draft.functionalImpact === false} onClick={() => setImpact(false)} />
+          <OptionButton label={t('common.yes')} active={draft.functionalImpact === true} onClick={() => setImpact(true)} />
+          <OptionButton label={t('common.no')} active={draft.functionalImpact === false} onClick={() => setImpact(false)} />
         </div>
       </div>
 
@@ -300,7 +316,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
               <button
                 onClick={() => setDraft(d => { const { note: _, ...rest } = d; return rest; })}
                 className="text-ink/35 hover:text-ink/60 transition-colors shrink-0 mt-0.5"
-                aria-label="Delete note"
+                aria-label={t('symptoms.deleteNote')}
               >
                 <X size={12} />
               </button>
@@ -315,7 +331,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
             className="flex items-center gap-1.5 text-xs text-ink/55 hover:text-ink/65 transition-colors"
           >
             <MessageSquare size={12} />
-            <span>{draft.note ? 'Add more...' : 'Add note...'}</span>
+            <span>{draft.note ? t('symptoms.addMore') : t('symptoms.addNote')}</span>
           </button>
         ) : (
           <textarea
@@ -333,7 +349,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
               setNoteText('');
               setNoteOpen(false);
             }}
-            placeholder="Add to your notes..."
+            placeholder={t('symptoms.notePlaceholder')}
             maxLength={500}
             rows={2}
             className="w-full bg-ink/[0.05] border border-ink/[0.08] rounded-xl px-3 py-2 text-sm text-ink/80 placeholder:text-ink/45 focus:outline-none focus:border-accent/40 resize-none"
@@ -360,7 +376,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
               >
                 <Check size={16} />
               </motion.div>
-              <span className="text-sm font-medium">Saved</span>
+              <span className="text-sm font-medium">{t('common.saved')}</span>
             </motion.div>
           ) : isDirty ? (
             <motion.button
@@ -372,7 +388,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
               onClick={handleSave}
               className="px-8 py-2.5 rounded-full bg-accent/20 border border-accent/40 text-sm font-medium text-accent hover:bg-accent/30 transition-colors"
             >
-              Save
+              {t('common.save')}
             </motion.button>
           ) : null}
         </AnimatePresence>

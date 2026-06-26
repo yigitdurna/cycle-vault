@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { diff, ymd, nice } from '../lib/cycle-math';
 import type { Cycle } from '../types';
+import { useTranslation } from '../i18n';
 
 interface ActivePeriodBannerProps {
   activeCycle: Cycle;
@@ -8,6 +9,7 @@ interface ActivePeriodBannerProps {
 }
 
 export function ActivePeriodBanner({ activeCycle, onEndCycle }: ActivePeriodBannerProps) {
+  const { t, locale } = useTranslation();
   const today = ymd(new Date());
   const dayCount = diff(today, activeCycle.start) + 1;
 
@@ -25,12 +27,12 @@ export function ActivePeriodBanner({ activeCycle, onEndCycle }: ActivePeriodBann
           <span className="relative inline-flex rounded-full h-3 w-3 bg-menstrual" />
         </span>
         <div>
-          <p className="text-sm font-medium">Period ongoing — Day {dayCount}</p>
-          <p className="text-xs text-ink/55">Started {nice(activeCycle.start)}</p>
+          <p className="text-sm font-medium">{t('home.bannerOngoing', { count: dayCount })}</p>
+          <p className="text-xs text-ink/55">{t('home.bannerStarted', { date: nice(activeCycle.start, locale) })}</p>
         </div>
       </div>
       <span className="text-xs text-ink/60 bg-ink/[0.05] px-3 py-1.5 rounded-xl">
-        End
+        {t('home.bannerEnd')}
       </span>
     </motion.button>
   );

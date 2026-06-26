@@ -10,6 +10,7 @@ import { CycleHistoryPanel } from '../components/CycleHistoryPanel';
 import type { PhaseInfo, PhaseResult, Insight, CyclePhase } from '../types';
 import type { Cycle } from '../types';
 import { getCycleStats } from '../lib/cycle-math';
+import { useTranslation } from '../i18n';
 
 interface HomeViewProps {
   todayPhase: PhaseResult | null;
@@ -27,6 +28,7 @@ interface HomeViewProps {
 }
 
 export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycles, todayInsights, insights, hasEnoughData, getPhaseDescription, customCycleLength, activeCycle, onEndCycle }: HomeViewProps) {
+  const { t } = useTranslation();
   const stats = getCycleStats(cycles, customCycleLength);
   const totalDays = stats?.med ?? customCycleLength;
   const displayDay = cycleDay ?? 1;
@@ -34,7 +36,7 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
   let phaseSubtitle: string | undefined;
   if (todayPhase) {
     if (todayPhase.type === 'period') {
-      phaseSubtitle = `Day ${todayPhase.day} of your period`;
+      phaseSubtitle = t('home.periodDay', { day: todayPhase.day ?? 1 });
     }
   }
 
@@ -42,9 +44,6 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
 
   // Replace static phase description with personalized one when available
   const personalDesc = getPhaseDescription(todayUIPhase.name);
-  const phaseInfoWithPersonalization = personalDesc
-    ? { ...todayUIPhase, description: personalDesc }
-    : todayUIPhase;
 
   return (
     <motion.div
@@ -60,13 +59,13 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
 
       <div className="w-full flex gap-4 mt-12">
         <StatCard
-          label="Next Period"
-          value={hasCycles && nextPeriod ? `${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'Day' : 'Days'}` : '—'}
+          label={t('home.nextPeriod')}
+          value={hasCycles && nextPeriod ? t('home.nextPeriodDay', { count: nextPeriod.daysToNext }) : '—'}
           icon={CalendarIcon}
         />
         <StatCard
-          label="Cycle Day"
-          value={hasCycles && cycleDay ? `Day ${cycleDay}` : '—'}
+          label={t('home.cycleDay')}
+          value={hasCycles && cycleDay ? t('home.cycleDayValue', { day: cycleDay }) : '—'}
           icon={Droplets}
         />
       </div>
@@ -82,10 +81,10 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
       {hasCycles && <CycleHistoryPanel cycles={cycles} />}
 
       {hasCycles ? (
-        <PhaseCard phaseInfo={phaseInfoWithPersonalization} subtitle={phaseSubtitle} />
+        <PhaseCard phaseInfo={todayUIPhase} description={personalDesc ?? undefined} subtitle={phaseSubtitle} />
       ) : (
         <div className="glass rounded-[2rem] p-6 mt-8 text-center">
-          <p className="text-ink/60">Head to the Calendar to log your first period.</p>
+          <p className="text-ink/60">{t('home.headToCalendar')}</p>
         </div>
       )}
     </motion.div>

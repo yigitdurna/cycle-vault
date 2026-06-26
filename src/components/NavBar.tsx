@@ -6,6 +6,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../i18n';
 
 export type Tab = 'home' | 'calendar' | 'history' | 'settings';
 
@@ -42,6 +43,7 @@ function NavButton({ active, onClick, icon: Icon, label }: {
 }
 
 export function NavBar({ activeTab, onTabChange }: NavBarProps) {
+  const { t } = useTranslation();
   return (
     <nav className="fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
       <div className="glass-dark rounded-[2.5rem] p-2 flex items-center justify-around shadow-2xl">
@@ -49,25 +51,25 @@ export function NavBar({ activeTab, onTabChange }: NavBarProps) {
           active={activeTab === 'calendar'}
           onClick={() => onTabChange('calendar')}
           icon={CalendarIcon}
-          label="Calendar"
+          label={t('nav.calendar')}
         />
         <NavButton
           active={activeTab === 'home'}
           onClick={() => onTabChange('home')}
           icon={LayoutDashboard}
-          label="Dashboard"
+          label={t('nav.home')}
         />
         <NavButton
           active={activeTab === 'history'}
           onClick={() => onTabChange('history')}
           icon={HistoryIcon}
-          label="History"
+          label={t('nav.history')}
         />
         <NavButton
           active={activeTab === 'settings'}
           onClick={() => onTabChange('settings')}
           icon={Settings}
-          label="Settings"
+          label={t('nav.settings')}
         />
       </div>
     </nav>

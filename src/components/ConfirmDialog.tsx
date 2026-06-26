@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from '../i18n';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -9,7 +10,8 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
-export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', onConfirm, onCancel }: ConfirmDialogProps) {
+export function ConfirmDialog({ open, title, message, confirmLabel, onConfirm, onCancel }: ConfirmDialogProps) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {open && (
@@ -33,13 +35,13 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', 
                 onClick={onCancel}
                 className="flex-1 py-3 rounded-2xl glass text-sm font-medium hover:bg-ink/[0.07] transition-colors"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={onConfirm}
                 className="flex-1 py-3 rounded-2xl bg-menstrual text-white text-sm font-medium hover:opacity-90 transition-opacity"
               >
-                {confirmLabel}
+                {confirmLabel ?? t('common.confirm')}
               </button>
             </div>
           </motion.div>

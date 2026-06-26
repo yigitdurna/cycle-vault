@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { TrendingUp, AlertTriangle, BarChart3, Calendar } from 'lucide-react';
 import type { Insight } from '../types';
+import { useTranslation } from '../i18n';
 
 const CATEGORY_CONFIG = {
   pattern: { icon: BarChart3, color: 'text-follicular' },
@@ -14,12 +15,13 @@ interface TodayInsightsPanelProps {
 }
 
 export function TodayInsightsPanel({ insights }: TodayInsightsPanelProps) {
+  const { t } = useTranslation();
   if (insights.length === 0) return null;
 
   return (
     <div className="w-full mt-6">
       <p className="text-xs text-ink/55 uppercase tracking-wider font-medium mb-3">
-        Today
+        {t('insights.today')}
       </p>
       <div className="flex gap-3 flex-wrap">
         {insights.map((insight, i) => {

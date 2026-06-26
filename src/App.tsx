@@ -14,6 +14,7 @@ import { LogPeriodSheet } from './components/LogPeriodSheet';
 import { DayDetailSheet } from './components/DayDetailSheet';
 import { useInsights } from './hooks/useInsights';
 import { useNotifications } from './hooks/useNotifications';
+import { LocaleContext, createTranslator, phaseName, phaseKey, capitalizeFirst } from './i18n';
 import { phaseTypeToUI, PHASES } from './types';
 import type { Cycle, DayLog } from './types';
 
@@ -34,7 +35,8 @@ export default function App() {
     setActiveTab(tab);
   };
 
-  const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility, notifications, setNotifications } = useSettings();
+  const { customCycleLength, setCustomCycleLength, hideFertility, setHideFertility, notifications, setNotifications, locale, setLocale } = useSettings();
+  const t = useMemo(() => createTranslator(locale), [locale]);
 
   const {
     cycles,
@@ -59,7 +61,7 @@ export default function App() {
 
   // Keep on-device reminders in sync (no-op on web). "Yes, log it" on the
   // "did your period start?" notification starts a period on the predicted day.
-  useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null));
+  useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null), locale);
 
   const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
 
@@ -72,17 +74,21 @@ export default function App() {
 
   const shareSummary = useMemo(() => {
     if (!cycles.length) return undefined;
-    const parts: string[] = ['cycle vault summary'];
-    if (cycleDay) parts.push(`Cycle day: ${cycleDay}`);
-    if (todayPhase) parts.push(`Phase: ${phaseTypeToUI(todayPhase.type, hideFertility)}`);
-    if (nextPeriod) parts.push(`Next period: in ${nextPeriod.daysToNext} day${nextPeriod.daysToNext === 1 ? '' : 's'}`);
+    const parts: string[] = [t('share.summaryHeader')];
+    if (cycleDay) parts.push(t('share.summaryCycleDay', { day: cycleDay }));
+    if (todayPhase) parts.push(t('share.summaryPhase', { phase: phaseName(t, phaseTypeToUI(todayPhase.type, hideFertility)) }));
+    if (nextPeriod) parts.push(t('share.summaryNextPeriod', { count: nextPeriod.daysToNext }));
     if (todayLog) {
-      if (todayLog.mood?.length) parts.push(`Mood: ${todayLog.mood.join(', ')}`);
-      if (todayLog.flow) parts.push(`Flow: ${todayLog.flow}`);
-      if (todayLog.cramps) parts.push(`Cramps: ${['mild', 'moderate', 'severe'][todayLog.cramps - 1]}`);
+      if (todayLog.mood?.length) {
+        parts.push(t('share.summaryMood', { value: todayLog.mood.map(m => t(`symptoms.mood${capitalizeFirst(m)}`)).join(', ') }));
+      }
+      if (todayLog.flow) parts.push(t('share.summaryFlow', { value: t(`symptoms.flow${capitalizeFirst(todayLog.flow)}`) }));
+      if (todayLog.cramps) {
+        parts.push(t('share.summaryCramps', { value: t(`symptoms.severity${['Mild', 'Moderate', 'Severe'][todayLog.cramps - 1]}`) }));
+      }
     }
     return parts.join('\n');
-  }, [cycles.length, cycleDay, todayPhase, nextPeriod, todayLog]);
+  }, [cycles.length, cycleDay, todayPhase, nextPeriod, todayLog, hideFertility, t]);
 
   const handleUpdateLogForDate = (date: string, partial: Partial<DayLog>) => {
     const current = allLogs[date] ?? { date };
@@ -142,6 +148,7 @@ export default function App() {
   };
 
   return (
+    <LocaleContext.Provider value={{ locale, t }}>
     <div className="min-h-screen relative overflow-hidden flex flex-col">
       {/* Background Gradient */}
       <AnimatePresence mode="wait">
@@ -260,6 +267,8 @@ export default function App() {
               hasData={hasData}
               notifications={notifications}
               onSetNotifications={setNotifications}
+              locale={locale}
+              onSetLocale={setLocale}
             />
           )}
         </AnimatePresence>
@@ -286,7 +295,7 @@ export default function App() {
         open={detailDate !== null}
         date={detailDate ?? ''}
         log={detailDate ? allLogs[detailDate] : undefined}
-        phaseName={detailUIPhase.name}
+        phaseName={t(`phases.${phaseKey(detailUIPhase.name)}`)}
         phaseColor={detailUIPhase.color}
         activeCycle={activeCycle}
         dateInRecordedPeriod={detailInRecordedPeriod}
@@ -296,5 +305,6 @@ export default function App() {
         onClose={() => setDetailDate(null)}
       />
     </div>
+    </LocaleContext.Provider>
   );
 }

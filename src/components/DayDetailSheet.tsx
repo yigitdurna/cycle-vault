@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Droplets, Moon, Zap, Frown, Pencil, Check, Play, Square } from 'lucide-react';
 import { nice } from '../lib/cycle-math';
 import { SymptomPills } from './SymptomPills';
+import { useTranslation } from '../i18n';
 import type { Cycle, DayLog, MoodValue, Severity, SleepQuality, FlowLevel } from '../types';
 
 interface DayDetailSheetProps {
@@ -20,20 +21,20 @@ interface DayDetailSheetProps {
   onUpdateLog: (date: string, log: Partial<DayLog>) => void;
 }
 
-const MOOD_LABELS: Record<MoodValue, string> = {
-  anxious: 'Anxious',
-  sad: 'Sad',
-  irritable: 'Irritable',
-  energetic: 'Energetic',
-  calm: 'Calm',
-  happy: 'Happy',
+const MOOD_KEYS: Record<MoodValue, string> = {
+  anxious: 'moodAnxious',
+  sad: 'moodSad',
+  irritable: 'moodIrritable',
+  energetic: 'moodEnergetic',
+  calm: 'moodCalm',
+  happy: 'moodHappy',
 };
 
-const FLOW_LABELS: Record<FlowLevel, string> = {
-  spotting: 'Spotting',
-  light: 'Light',
-  medium: 'Medium',
-  heavy: 'Heavy',
+const FLOW_KEYS: Record<FlowLevel, string> = {
+  spotting: 'flowSpotting',
+  light: 'flowLight',
+  medium: 'flowMedium',
+  heavy: 'flowHeavy',
 };
 
 function SeverityBar({ value, max = 3 }: { value: number; max?: number }) {
@@ -51,30 +52,20 @@ function SeverityBar({ value, max = 3 }: { value: number; max?: number }) {
   );
 }
 
-function SeverityLabel(value: Severity): string {
-  switch (value) {
-    case 1: return 'Low';
-    case 2: return 'Medium';
-    case 3: return 'High';
-  }
-}
+const SEVERITY_KEYS: Record<Severity, string> = { 1: 'detailLow', 2: 'detailMedium', 3: 'detailHigh' };
+const SLEEP_KEYS: Record<SleepQuality, string> = { 1: 'sleepPoor', 2: 'sleepFair', 3: 'sleepGood' };
 
-function SleepLabel(value: SleepQuality): string {
-  switch (value) {
-    case 1: return 'Poor';
-    case 2: return 'Fair';
-    case 3: return 'Good';
-  }
-}
-
-const PAIN_LABELS: Record<string, string> = {
-  head: 'Head',
-  breast: 'Breast',
-  back: 'Back',
-  joints: 'Joints',
+const PAIN_KEYS: Record<string, string> = {
+  head: 'painHead',
+  breast: 'painBreast',
+  back: 'painBack',
+  joints: 'painJoints',
 };
 
 export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeCycle, dateInRecordedPeriod = false, onStartPeriod, onEndPeriod, onClose, onUpdateLog }: DayDetailSheetProps) {
+  const { t, locale } = useTranslation();
+  const severityLabel = (v: Severity) => t(`symptoms.${SEVERITY_KEYS[v]}`);
+  const sleepLabel = (v: SleepQuality) => t(`symptoms.${SLEEP_KEYS[v]}`);
   const [editing, setEditing] = useState(false);
 
   // Always reopen in read mode for a fresh day.
@@ -123,7 +114,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-xl font-serif font-bold">{nice(date)}</h3>
+                <h3 className="text-xl font-serif font-bold">{nice(date, locale)}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <div
                     className="w-2.5 h-2.5 rounded-full"
@@ -134,7 +125,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
               </div>
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={t('common.close')}
                 className="w-11 h-11 rounded-full bg-ink/[0.06] flex items-center justify-center"
               >
                 <X size={18} />
@@ -150,8 +141,8 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                 {log.flow && (
                   <div className="flex items-center gap-3 glass rounded-2xl p-3">
                     <Droplets size={16} className="text-menstrual shrink-0" />
-                    <span className="text-sm font-medium">Flow</span>
-                    <span className="text-sm text-ink/60 ml-auto">{FLOW_LABELS[log.flow]}</span>
+                    <span className="text-sm font-medium">{t('symptoms.flow')}</span>
+                    <span className="text-sm text-ink/60 ml-auto">{t(`symptoms.${FLOW_KEYS[log.flow]}`)}</span>
                   </div>
                 )}
 
@@ -160,12 +151,12 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                   <div className="glass rounded-2xl p-3 space-y-2">
                     <div className="flex items-center gap-3">
                       <Frown size={16} className="text-ovulation shrink-0" />
-                      <span className="text-sm font-medium">Mood</span>
+                      <span className="text-sm font-medium">{t('symptoms.mood')}</span>
                     </div>
                     <div className="flex flex-wrap gap-2 pl-7">
                       {log.mood.map(m => (
                         <span key={m} className="text-xs bg-ink/[0.06] rounded-full px-3 py-1">
-                          {MOOD_LABELS[m]}
+                          {t(`symptoms.${MOOD_KEYS[m]}`)}
                         </span>
                       ))}
                     </div>
@@ -176,9 +167,9 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                 {log.energy && (
                   <div className="flex items-center gap-3 glass rounded-2xl p-3">
                     <Zap size={16} className="text-follicular shrink-0" />
-                    <span className="text-sm font-medium">Energy</span>
+                    <span className="text-sm font-medium">{t('symptoms.energy')}</span>
                     <div className="ml-auto flex items-center gap-2">
-                      <span className="text-xs text-ink/55">{SeverityLabel(log.energy)}</span>
+                      <span className="text-xs text-ink/55">{severityLabel(log.energy)}</span>
                       <SeverityBar value={log.energy} />
                     </div>
                   </div>
@@ -188,9 +179,9 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                 {log.cramps && (
                   <div className="flex items-center gap-3 glass rounded-2xl p-3">
                     <div className="w-4 h-4 shrink-0 flex items-center justify-center text-menstrual text-xs font-bold">~</div>
-                    <span className="text-sm font-medium">Cramps</span>
+                    <span className="text-sm font-medium">{t('symptoms.cramps')}</span>
                     <div className="ml-auto flex items-center gap-2">
-                      <span className="text-xs text-ink/55">{SeverityLabel(log.cramps)}</span>
+                      <span className="text-xs text-ink/55">{severityLabel(log.cramps)}</span>
                       <SeverityBar value={log.cramps} />
                     </div>
                   </div>
@@ -200,9 +191,9 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                 {log.sleep && (
                   <div className="flex items-center gap-3 glass rounded-2xl p-3">
                     <Moon size={16} className="text-luteal shrink-0" />
-                    <span className="text-sm font-medium">Sleep</span>
+                    <span className="text-sm font-medium">{t('symptoms.sleep')}</span>
                     <div className="ml-auto flex items-center gap-2">
-                      <span className="text-xs text-ink/55">{SleepLabel(log.sleep)}</span>
+                      <span className="text-xs text-ink/55">{sleepLabel(log.sleep)}</span>
                       <SeverityBar value={log.sleep} />
                     </div>
                   </div>
@@ -213,16 +204,16 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                   <div className="glass rounded-2xl p-3 space-y-2">
                     <div className="flex items-center gap-3">
                       <div className="w-4 h-4 shrink-0 flex items-center justify-center text-menstrual text-xs font-bold">!</div>
-                      <span className="text-sm font-medium">Pain</span>
+                      <span className="text-sm font-medium">{t('symptoms.pain')}</span>
                       <div className="ml-auto flex items-center gap-2">
-                        <span className="text-xs text-ink/55">{SeverityLabel(log.pain.severity)}</span>
+                        <span className="text-xs text-ink/55">{severityLabel(log.pain.severity)}</span>
                         <SeverityBar value={log.pain.severity} />
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2 pl-7">
                       {log.pain.locations.map(loc => (
                         <span key={loc} className="text-xs bg-ink/[0.06] rounded-full px-3 py-1">
-                          {PAIN_LABELS[loc]}
+                          {t(`symptoms.${PAIN_KEYS[loc]}`)}
                         </span>
                       ))}
                     </div>
@@ -232,7 +223,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                 {/* Functional Impact */}
                 {log.functionalImpact && (
                   <div className="glass rounded-2xl p-3">
-                    <span className="text-xs text-menstrual">Affected daily activities</span>
+                    <span className="text-xs text-menstrual">{t('symptoms.impactAffected')}</span>
                   </div>
                 )}
 
@@ -245,7 +236,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-ink/45 text-sm">No symptoms logged for this day</p>
+                <p className="text-ink/45 text-sm">{t('symptoms.noSymptomsForDay')}</p>
               </div>
             )}
 
@@ -258,7 +249,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                     className="w-full py-3.5 rounded-2xl bg-menstrual text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                   >
                     <Play size={14} />
-                    Start a period here
+                    {t('sheet.startPeriodHere')}
                   </button>
                 )}
                 {canEndPeriod && (
@@ -267,7 +258,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
                     className="w-full py-3.5 rounded-2xl bg-menstrual text-white font-semibold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
                   >
                     <Square size={14} />
-                    End period on this day
+                    {t('sheet.endPeriodOnDay')}
                   </button>
                 )}
               </div>
@@ -279,7 +270,7 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
               className="w-full mt-3 py-3.5 rounded-2xl bg-ink/[0.06] hover:bg-ink/10 transition-colors text-sm font-medium flex items-center justify-center gap-2"
             >
               {editing ? <Check size={14} /> : <Pencil size={14} />}
-              {editing ? 'Done' : hasData ? 'Edit symptoms' : 'Log symptoms'}
+              {editing ? t('common.done') : hasData ? t('symptoms.editSymptoms') : t('symptoms.logSymptoms')}
             </button>
           </motion.div>
         </motion.div>

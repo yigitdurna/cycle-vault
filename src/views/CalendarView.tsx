@@ -5,6 +5,7 @@ import { SymptomPills } from '../components/SymptomPills';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
 import type { Cycle, PhaseResult, DayLog, DayLogs } from '../types';
 import { fromYmd, ymd, niceShort } from '../lib/cycle-math';
+import { useTranslation } from '../i18n';
 
 interface CalendarViewProps {
   getPhaseForDate: (dateStr: string) => PhaseResult | null;
@@ -51,6 +52,7 @@ export function CalendarView({
   activeCycle, onEndCycle, nextPeriod, cycleProgress,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
+  const { t, locale } = useTranslation();
   const selecting = selectionStart !== null;
 
   return (
@@ -71,12 +73,12 @@ export function CalendarView({
           <div>
             <p className="text-sm font-semibold">
               {nextPeriod.daysToNext < 0
-                ? `Period overdue by ${-nextPeriod.daysToNext} ${nextPeriod.daysToNext === -1 ? 'day' : 'days'}`
+                ? t('calendar.periodOverdue', { count: -nextPeriod.daysToNext })
                 : nextPeriod.daysToNext === 0
-                ? 'Period expected today'
-                : `Next period in ${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'day' : 'days'}`}
+                ? t('calendar.periodExpectedToday')
+                : t('calendar.nextPeriodIn', { count: nextPeriod.daysToNext })}
             </p>
-            <p className="text-xs text-ink/55 mt-0.5">Around {niceShort(nextPeriod.date)}</p>
+            <p className="text-xs text-ink/55 mt-0.5">{t('calendar.around', { date: niceShort(nextPeriod.date, locale) })}</p>
           </div>
         </div>
       )}
@@ -85,20 +87,20 @@ export function CalendarView({
       {selecting && (
         <div className="rounded-3xl p-4 bg-accent/15 border border-accent/30 flex items-center gap-3">
           <div className="flex-1">
-            <div className="text-sm font-semibold text-accent">Pick the end date</div>
+            <div className="text-sm font-semibold text-accent">{t('calendar.pickEndDate')}</div>
             <div className="text-xs text-ink/65 mt-0.5">
-              Period starting {niceShort(selectionStart!)} — tap the last day, or:
+              {t('calendar.periodStartingTap', { date: niceShort(selectionStart!, locale) })}
             </div>
           </div>
           <button
             onClick={onStillOngoing}
             className="px-3 py-1.5 rounded-full bg-accent text-white text-xs font-medium hover:opacity-90 transition-opacity"
           >
-            Still ongoing
+            {t('calendar.stillOngoing')}
           </button>
           <button
             onClick={onCancelSelection}
-            aria-label="Cancel"
+            aria-label={t('common.cancel')}
             className="w-8 h-8 rounded-full bg-ink/[0.06] flex items-center justify-center"
           >
             <X size={15} />
@@ -131,23 +133,23 @@ export function CalendarView({
           <div className="glass rounded-3xl p-4 flex flex-wrap justify-center gap-x-5 gap-y-2.5">
             <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 rounded-full bg-menstrual" />
-              <span className="text-xs font-medium text-ink/70">Period</span>
+              <span className="text-xs font-medium text-ink/70">{t('calendar.legendPeriod')}</span>
             </div>
             {!hideFertility && (
               <>
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-full bg-follicular" />
-                  <span className="text-xs font-medium text-ink/70">Fertile</span>
+                  <span className="text-xs font-medium text-ink/70">{t('calendar.legendFertile')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3.5 h-3.5 rounded-full bg-ovulation" />
-                  <span className="text-xs font-medium text-ink/70">Ovulation</span>
+                  <span className="text-xs font-medium text-ink/70">{t('calendar.legendOvulation')}</span>
                 </div>
               </>
             )}
             <div className="flex items-center gap-2">
               <div className="w-3.5 h-3.5 rounded-full bg-luteal" />
-              <span className="text-xs font-medium text-ink/70">Luteal</span>
+              <span className="text-xs font-medium text-ink/70">{t('calendar.legendLuteal')}</span>
             </div>
           </div>
 

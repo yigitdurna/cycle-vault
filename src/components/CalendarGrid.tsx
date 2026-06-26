@@ -14,6 +14,7 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ymd } from '../lib/cycle-math';
+import { useTranslation } from '../i18n';
 import { dayLogHasData } from '../hooks/useDayLogs';
 import type { PhaseResult, DayLogs } from '../types';
 
@@ -30,8 +31,6 @@ interface CalendarGridProps {
   /** Childfree / not-TTC mode: render fertile + ovulation days as follicular */
   hideFertility?: boolean;
 }
-
-const DAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 /** Collapse fertile/ovulation to follicular when fertility is hidden. */
 function effectiveType(type: PhaseResult['type'], hideFertility: boolean): PhaseResult['type'] {
@@ -60,8 +59,19 @@ function getPhaseDot(phase: PhaseResult | null, hideFertility: boolean): string 
 }
 
 export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSelectDate, dayLogs, onDayTap, hideFertility = false }: CalendarGridProps) {
+  const { t, locale } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const touchStartX = useRef(0);
+
+  const DAY_HEADERS = [
+    t('calendar.weekdaySun'),
+    t('calendar.weekdayMon'),
+    t('calendar.weekdayTue'),
+    t('calendar.weekdayWed'),
+    t('calendar.weekdayThu'),
+    t('calendar.weekdayFri'),
+    t('calendar.weekdaySat'),
+  ];
 
   const today = new Date();
   const monthStart = startOfMonth(currentMonth);
@@ -103,17 +113,17 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          aria-label="Previous month"
+          aria-label={t('calendar.prevMonth')}
           className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-ink/[0.06] transition-colors"
         >
           <ChevronLeft size={18} />
         </button>
         <span className="text-base font-serif font-bold">
-          {format(currentMonth, 'MMMM yyyy')}
+          {currentMonth.toLocaleDateString(locale, { month: 'long', year: 'numeric' })}
         </span>
         <button
           onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          aria-label="Next month"
+          aria-label={t('calendar.nextMonth')}
           className="w-11 h-11 rounded-full flex items-center justify-center hover:bg-ink/[0.06] transition-colors"
         >
           <ChevronRight size={18} />

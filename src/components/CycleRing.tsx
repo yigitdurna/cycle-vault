@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import type { PhaseInfo } from '../types';
+import { useTranslation, phaseName } from '../i18n';
 
 interface CycleRingProps {
   day: number;
@@ -8,6 +9,7 @@ interface CycleRingProps {
 }
 
 export function CycleRing({ day, totalDays, phaseInfo }: CycleRingProps) {
+  const { t } = useTranslation();
   const percentage = (day / totalDays) * 100;
   const radius = 120;
   const circumference = 2 * Math.PI * radius;
@@ -60,7 +62,7 @@ export function CycleRing({ day, totalDays, phaseInfo }: CycleRingProps) {
           animate={{ opacity: 1, y: 0 }}
           className="text-5xl font-serif font-bold tracking-tight"
         >
-          Day {day}
+          {t('home.ringDay', { day })}
         </motion.div>
         <motion.div
           key={phaseInfo.name}
@@ -68,7 +70,7 @@ export function CycleRing({ day, totalDays, phaseInfo }: CycleRingProps) {
           animate={{ opacity: 0.6 }}
           className="text-sm uppercase tracking-[0.2em] mt-1 font-medium"
         >
-          {phaseInfo.name} Phase
+          {t('home.ringPhase', { phase: phaseName(t, phaseInfo.name) })}
         </motion.div>
       </div>
     </div>

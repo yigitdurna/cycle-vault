@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { CalendarGrid } from './CalendarGrid';
 import { ymd, nice, fromYmd } from '../lib/cycle-math';
 import { cn } from '../lib/utils';
+import { useTranslation } from '../i18n';
 import type { Cycle, PhaseResult } from '../types';
 
 type SheetMode = 'start' | 'end' | 'log' | 'edit';
@@ -20,21 +21,22 @@ interface LogPeriodSheetProps {
 // Stub phase function for the log sheet calendar (no phase coloring needed)
 const noPhase = (): PhaseResult | null => null;
 
-const TITLES: Record<SheetMode, string> = {
-  start: 'Start Cycle',
-  end: 'End Cycle',
-  log: 'Log Period',
-  edit: 'Edit Period',
+const TITLE_KEYS: Record<SheetMode, string> = {
+  start: 'titleStart',
+  end: 'titleEnd',
+  log: 'titleLog',
+  edit: 'titleEdit',
 };
 
-const SAVE_LABELS: Record<SheetMode, string> = {
-  start: 'Start Cycle',
-  end: 'End Cycle',
-  log: 'Log Period',
-  edit: 'Update Period',
+const SAVE_KEYS: Record<SheetMode, string> = {
+  start: 'saveStart',
+  end: 'saveEnd',
+  log: 'saveLog',
+  edit: 'saveEdit',
 };
 
 export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndCycle, onClose }: LogPeriodSheetProps) {
+  const { t, locale } = useTranslation();
   const [mode, setMode] = useState<SheetMode>('start');
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
@@ -131,7 +133,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-serif font-bold">
-                {TITLES[mode]}
+                {t(`sheet.${TITLE_KEYS[mode]}`)}
               </h3>
               <button onClick={onClose} className="w-8 h-8 rounded-full bg-ink/[0.05] flex items-center justify-center">
                 <X size={16} />
@@ -152,7 +154,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                     activeCycle && 'opacity-30 cursor-not-allowed'
                   )}
                 >
-                  Start Cycle
+                  {t('sheet.tabStart')}
                 </button>
                 {activeCycle && (
                   <button
@@ -164,7 +166,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                         : 'bg-ink/[0.05] text-ink/55'
                     )}
                   >
-                    End Cycle
+                    {t('sheet.tabEnd')}
                   </button>
                 )}
                 <button
@@ -176,7 +178,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                       : 'bg-ink/[0.05] text-ink/55'
                   )}
                 >
-                  Log Period
+                  {t('sheet.tabLog')}
                 </button>
               </div>
             )}
@@ -185,9 +187,9 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
             <div className="flex gap-4 mb-6">
               {mode === 'start' && (
                 <div className="flex-1 glass rounded-2xl p-3 text-center">
-                  <div className="text-[10px] text-ink/55 uppercase tracking-wider">Start</div>
+                  <div className="text-[10px] text-ink/55 uppercase tracking-wider">{t('sheet.labelStart')}</div>
                   <div className="text-sm font-medium mt-1">
-                    {start ? nice(ymd(start)) : '—'}
+                    {start ? nice(ymd(start), locale) : '—'}
                   </div>
                 </div>
               )}
@@ -195,13 +197,13 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
               {mode === 'end' && activeCycle && (
                 <>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">Started</div>
-                    <div className="text-sm font-medium mt-1">{nice(activeCycle.start)}</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">{t('sheet.labelStarted')}</div>
+                    <div className="text-sm font-medium mt-1">{nice(activeCycle.start, locale)}</div>
                   </div>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">End</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">{t('sheet.labelEnd')}</div>
                     <div className="text-sm font-medium mt-1">
-                      {start ? nice(ymd(start)) : '—'}
+                      {start ? nice(ymd(start), locale) : '—'}
                     </div>
                   </div>
                 </>
@@ -210,15 +212,15 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
               {(mode === 'log' || mode === 'edit') && (
                 <>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">Start</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">{t('sheet.labelStart')}</div>
                     <div className="text-sm font-medium mt-1">
-                      {start ? nice(ymd(start)) : '—'}
+                      {start ? nice(ymd(start), locale) : '—'}
                     </div>
                   </div>
                   <div className="flex-1 glass rounded-2xl p-3 text-center">
-                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">End</div>
+                    <div className="text-[10px] text-ink/55 uppercase tracking-wider">{t('sheet.labelEnd')}</div>
                     <div className="text-sm font-medium mt-1">
-                      {end ? nice(ymd(end)) : '—'}
+                      {end ? nice(ymd(end), locale) : '—'}
                     </div>
                   </div>
                 </>
@@ -241,7 +243,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
               disabled={!canSave}
               className="w-full py-4 rounded-2xl bg-accent text-white font-semibold text-sm disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
             >
-              {SAVE_LABELS[mode]}
+              {t(`sheet.${SAVE_KEYS[mode]}`)}
             </button>
           </motion.div>
         </motion.div>
