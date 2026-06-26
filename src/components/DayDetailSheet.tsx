@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Droplets, Moon, Zap, Frown, Pencil } from 'lucide-react';
+import { X, Droplets, Moon, Zap, Frown, Pencil, Check } from 'lucide-react';
 import { nice } from '../lib/cycle-math';
+import { SymptomPills } from './SymptomPills';
 import type { DayLog, MoodValue, Severity, SleepQuality, FlowLevel } from '../types';
 
 interface DayDetailSheetProps {
@@ -67,7 +69,14 @@ const PAIN_LABELS: Record<string, string> = {
   joints: 'Joints',
 };
 
-export function DayDetailSheet({ open, date, log, phaseName, phaseColor, onClose }: DayDetailSheetProps) {
+export function DayDetailSheet({ open, date, log, phaseName, phaseColor, onClose, onUpdateLog }: DayDetailSheetProps) {
+  const [editing, setEditing] = useState(false);
+
+  // Always reopen in read mode for a fresh day.
+  useEffect(() => {
+    if (!open) setEditing(false);
+  }, [open]);
+
   const hasData = log && (
     log.mood?.length ||
     log.energy ||
@@ -120,7 +129,9 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, onClose
             </div>
 
             {/* Content */}
-            {hasData ? (
+            {editing ? (
+              <SymptomPills log={log} onUpdate={(partial) => onUpdateLog(date, partial)} />
+            ) : hasData ? (
               <div className="space-y-4">
                 {/* Flow */}
                 {log.flow && (
@@ -227,11 +238,11 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, onClose
 
             {/* Action button */}
             <button
-              onClick={onClose}
+              onClick={() => (editing ? setEditing(false) : setEditing(true))}
               className="w-full mt-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 transition-colors text-sm font-medium flex items-center justify-center gap-2"
             >
-              <Pencil size={14} />
-              {hasData ? 'Edit Symptoms' : 'Log Symptoms'}
+              {editing ? <Check size={14} /> : <Pencil size={14} />}
+              {editing ? 'Done' : hasData ? 'Edit Symptoms' : 'Log Symptoms'}
             </button>
           </motion.div>
         </motion.div>
