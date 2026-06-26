@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { DayLog, DayLogs, SymptomSnapshot } from '../types';
+import { ymd } from '../lib/cycle-math';
 
 const STORAGE_KEY = 'cycle-tracker-daylogs-v1';
 const NOTE_MAX_LENGTH = 500;
@@ -14,10 +15,6 @@ function loadLogs(): DayLogs {
 
 function saveLogs(logs: DayLogs) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-}
-
-function ymd(d: Date): string {
-  return d.toISOString().slice(0, 10);
 }
 
 export function useDayLogs() {

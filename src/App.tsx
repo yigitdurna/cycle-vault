@@ -4,7 +4,7 @@ import { cn } from './lib/utils';
 import { useCycles } from './hooks/useCycles';
 import { useDayLogs } from './hooks/useDayLogs';
 import { useSettings } from './hooks/useSettings';
-import { getCycleStats } from './lib/cycle-math';
+import { getCycleStats, ymd } from './lib/cycle-math';
 import { NavBar, type Tab } from './components/NavBar';
 import { HomeView } from './views/HomeView';
 import { CalendarView } from './views/CalendarView';
@@ -54,7 +54,7 @@ export default function App() {
   const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
 
   const handleUpdateLog = (partial: Partial<DayLog>) => {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = ymd(new Date());
     const current = todayLog ?? { date: today };
     const merged = { ...current, ...partial };
     setLog(today, merged);
