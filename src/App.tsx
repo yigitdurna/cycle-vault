@@ -105,6 +105,12 @@ export default function App() {
 
   const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
 
+  // Fraction of the current cycle elapsed — drives the countdown bar's ring.
+  const cycleProgress = useMemo(() => {
+    const med = getCycleStats(cycles, customCycleLength ?? 28)?.med ?? (customCycleLength ?? 28);
+    return cycleDay ? Math.min(1, cycleDay / med) : 0;
+  }, [cycles, cycleDay, customCycleLength]);
+
   // Guided period logging from the calendar: a date tapped as "start" enters
   // end-selection mode; the next tap (>= start) commits both atomically. An
   // earlier tap re-anchors the start; "still ongoing" leaves the end open.
@@ -210,6 +216,7 @@ export default function App() {
               activeCycle={activeCycle}
               onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
               nextPeriod={nextPeriod}
+              cycleProgress={cycleProgress}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}

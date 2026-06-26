@@ -16,6 +16,8 @@ interface CalendarViewProps {
   activeCycle: Cycle | null;
   onEndCycle: () => void;
   nextPeriod: { date: string; daysToNext: number } | null;
+  /** 0–1 fraction of the current cycle elapsed (for the countdown ring). */
+  cycleProgress: number;
   /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
@@ -23,9 +25,30 @@ interface CalendarViewProps {
   onCancelSelection: () => void;
 }
 
+/** Small ring that fills as the cycle progresses toward the next period. */
+function ProgressRing({ progress }: { progress: number }) {
+  const r = 16;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(1, progress));
+  return (
+    <div className="relative w-11 h-11 shrink-0 flex items-center justify-center">
+      <svg viewBox="0 0 40 40" className="absolute inset-0 w-full h-full -rotate-90">
+        <circle cx="20" cy="20" r={r} fill="none" strokeWidth="3" className="stroke-ink/10" />
+        <circle
+          cx="20" cy="20" r={r} fill="none" strokeWidth="3" strokeLinecap="round"
+          className="stroke-menstrual transition-[stroke-dashoffset] duration-700"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - clamped)}
+        />
+      </svg>
+      <Droplets size={15} className="text-menstrual relative" />
+    </div>
+  );
+}
+
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle, nextPeriod,
+  activeCycle, onEndCycle, nextPeriod, cycleProgress,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const selecting = selectionStart !== null;
@@ -43,10 +66,8 @@ export function CalendarView({
         <ActivePeriodBanner activeCycle={activeCycle} onEndCycle={onEndCycle} />
       )}
       {!selecting && !activeCycle && nextPeriod && (
-        <div className="glass rounded-2xl p-4 flex items-center gap-3 border border-accent/20">
-          <div className="w-10 h-10 rounded-xl bg-menstrual/15 flex items-center justify-center shrink-0">
-            <Droplets size={18} className="text-menstrual" />
-          </div>
+        <div className="glass rounded-2xl p-4 flex items-center gap-4 border border-accent/20">
+          <ProgressRing progress={cycleProgress} />
           <div>
             <p className="text-sm font-semibold">
               {nextPeriod.daysToNext === 0
