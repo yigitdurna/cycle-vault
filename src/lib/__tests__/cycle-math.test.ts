@@ -257,9 +257,46 @@ describe('getPhaseForDate', () => {
   });
 
   it('returns "luteal" for a day after the fertile window', () => {
-    // dayInCycle = diff('2026-01-21', '2026-01-01') = 20 > 18 → luteal
+    // cycleDay = 20 + 1 ... diff('2026-01-21','2026-01-01')=20 → cycleDay 21 > 18 → luteal
     const result = getPhaseForDate('2026-01-21', baseCycles);
     expect(result?.type).toBe('luteal');
+  });
+
+  // --- 1-based cycle-day boundaries (regression: phases used to be shifted
+  //     one day late because boundaries were compared against 0-based offsets) ---
+
+  it('fertile window opens on cycle day med-16 (Jan 12 for a 28-day cycle)', () => {
+    // diff('2026-01-12','2026-01-01')=11 → cycleDay 12 = med-16. Was follicular pre-fix.
+    const result = getPhaseForDate('2026-01-12', baseCycles);
+    expect(result?.type).toBe('fertile');
+    expect(result?.day).toBe(12); // day is now 1-based, consistent with period
+  });
+
+  it('last follicular day is cycle day 11 (Jan 11), just before the fertile window', () => {
+    const result = getPhaseForDate('2026-01-11', baseCycles);
+    expect(result?.type).toBe('follicular');
+    expect(result?.day).toBe(11);
+  });
+
+  it('peak ovulation begins on cycle day med-14 (Jan 14 for a 28-day cycle)', () => {
+    // diff('2026-01-14','2026-01-01')=13 → cycleDay 14 = med-14. Was "fertile" pre-fix.
+    const result = getPhaseForDate('2026-01-14', baseCycles);
+    expect(result?.type).toBe('ovulation');
+    expect(result?.day).toBe(14);
+  });
+
+  it('exposes the fertile window dates as 1-based cycle days', () => {
+    // Window = cycle days 12..18 → Jan 12 .. Jan 18
+    const result = getPhaseForDate('2026-01-13', baseCycles);
+    expect(result?.type).toBe('fertile');
+    expect(result?.fertileStart && ymd(result.fertileStart)).toBe('2026-01-12');
+    expect(result?.fertileEnd && ymd(result.fertileEnd)).toBe('2026-01-18');
+  });
+
+  it('first luteal day is cycle day med-9 (Jan 19), just after the fertile window', () => {
+    const result = getPhaseForDate('2026-01-19', baseCycles);
+    expect(result?.type).toBe('luteal');
+    expect(result?.day).toBe(19);
   });
 
   it('returns predicted "period" (recorded: false) when no next actual cycle exists', () => {

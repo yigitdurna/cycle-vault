@@ -122,6 +122,13 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
 
   const med = stats.med;
 
+  // 1-based cycle day (cycle day 1 = the first day of the period). Every phase
+  // boundary below is expressed as a cycle-day number, so they are compared
+  // against this — NOT the 0-based `dayInCycle`. Returning `cycleDay` as the
+  // `day` field also keeps all phases consistent with the recorded-period
+  // branch above, which is likewise 1-based.
+  const cycleDay = dayInCycle + 1;
+
   // Determine Period Length for Anchor
   let periodLen = 5;
   const anchorObj = cycles.find(c => c.start === anchorStart);
@@ -138,33 +145,35 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
     if (hasActualNextCycle) return null;
   }
 
-  // Determine Phase
-  if (dayInCycle >= 0 && dayInCycle < periodLen) {
-    return { type: 'period', day: dayInCycle + 1, recorded: false };
+  // Determine Phase (all boundaries are 1-based cycle-day numbers)
+  if (cycleDay >= 1 && cycleDay <= periodLen) {
+    return { type: 'period', day: cycleDay, recorded: false };
   }
 
   // If we are in Cycle 1 (Next Cycle), ONLY show period.
   if (cycleNum === 1) return null;
 
-  // Evidence-based fertile window (Bull et al. 2019)
-  // Luteal phase: mean 12.4 days, range 7-17 days
-  // Fertile window spans med-16 to med-10
-  const fertileStart = Math.max(periodLen, med - 16);
+  // Evidence-based fertile window (Bull et al. 2019), as cycle-day numbers.
+  // Luteal phase mean 12.4 days → ovulation ≈ cycle day (med − 14); the
+  // fertile window spans cycle days (med − 16) … (med − 10). It can't begin
+  // before the day after the period ends.
+  const fertileStart = Math.max(periodLen + 1, med - 16);
   const fertileEnd = med - 10;
 
-  if (dayInCycle >= fertileStart && dayInCycle <= fertileEnd) {
+  if (cycleDay >= fertileStart && cycleDay <= fertileEnd) {
     return {
-      type: dayInCycle >= med - 14 && dayInCycle <= med - 12 ? 'ovulation' : 'fertile',
-      day: dayInCycle,
-      fertileStart: addDays(fromYmd(anchorStart), fertileStart),
-      fertileEnd: addDays(fromYmd(anchorStart), fertileEnd),
+      type: cycleDay >= med - 14 && cycleDay <= med - 12 ? 'ovulation' : 'fertile',
+      day: cycleDay,
+      // addDays counts from the anchor (cycle day 1 = offset 0), so subtract 1.
+      fertileStart: addDays(fromYmd(anchorStart), fertileStart - 1),
+      fertileEnd: addDays(fromYmd(anchorStart), fertileEnd - 1),
     };
   }
-  if (dayInCycle > fertileEnd) {
-    return { type: 'luteal', day: dayInCycle };
+  if (cycleDay > fertileEnd) {
+    return { type: 'luteal', day: cycleDay };
   }
 
-  return { type: 'follicular', day: dayInCycle };
+  return { type: 'follicular', day: cycleDay };
 }
 
 // --- Next Period Calculation (from renderDashboard) ---
