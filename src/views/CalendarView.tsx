@@ -16,6 +16,7 @@ interface CalendarViewProps {
   activeCycle: Cycle | null;
   onEndCycle: () => void;
   nextPeriod: { date: string; daysToNext: number } | null;
+  cycleDay: number | null;
   /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
@@ -25,7 +26,7 @@ interface CalendarViewProps {
 
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle, nextPeriod,
+  activeCycle, onEndCycle, nextPeriod, cycleDay,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const selecting = selectionStart !== null;
@@ -43,18 +44,25 @@ export function CalendarView({
         <ActivePeriodBanner activeCycle={activeCycle} onEndCycle={onEndCycle} />
       )}
       {!selecting && !activeCycle && nextPeriod && (
-        <div className="glass rounded-[2rem] p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-menstrual/15 flex items-center justify-center shrink-0">
-            <Droplets size={18} className="text-menstrual" />
-          </div>
-          <div>
-            <div className="text-sm font-semibold">
-              {nextPeriod.daysToNext === 0
-                ? 'Period expected today'
-                : `Next period in ${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'day' : 'days'}`}
+        <div className="glass rounded-2xl p-4 flex items-center justify-between border border-accent/20">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-menstrual/15 flex items-center justify-center shrink-0">
+              <Droplets size={18} className="text-menstrual" />
             </div>
-            <div className="text-xs text-ink/55 mt-0.5">Around {niceShort(nextPeriod.date)}</div>
+            <div>
+              <p className="text-sm font-semibold">
+                {nextPeriod.daysToNext === 0
+                  ? 'Period expected today'
+                  : `Next period in ${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'day' : 'days'}`}
+              </p>
+              <p className="text-xs text-ink/55 mt-0.5">Around {niceShort(nextPeriod.date)}</p>
+            </div>
           </div>
+          {cycleDay && (
+            <span className="text-xs font-medium text-ink/70 bg-ink/[0.05] px-3 py-1.5 rounded-xl shrink-0">
+              Day {cycleDay}
+            </span>
+          )}
         </div>
       )}
 

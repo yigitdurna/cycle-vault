@@ -210,6 +210,7 @@ export default function App() {
               activeCycle={activeCycle}
               onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
               nextPeriod={nextPeriod}
+              cycleDay={cycleDay}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}
