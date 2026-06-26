@@ -17,6 +17,7 @@ const TYPE_BASE = {
   ovulation: 5_000_000,
   fertileWindow: 6_000_000,
   wellnessTips: 7_000_000,
+  duringPeriod: 8_000_000,
 } as const;
 
 const PERIOD_LEN_DEFAULT = 5;
@@ -127,15 +128,29 @@ export function planNotifications(
     }
   }
 
-  // Active-cycle "did it end?" (independent of prediction).
+  // Active-cycle reminders (independent of prediction).
   const active = cycles.find(c => c.end === null);
-  if (settings.periodEndConfirm && active) {
-    out.push({
-      id: TYPE_BASE.periodEndConfirm,
-      copyKey: 'endConfirm',
-      args: { day: settings.endReminderDay },
-      at: atTime(addDays(fromYmd(active.start), settings.endReminderDay), settings.reminderTime),
-    });
+  if (active) {
+    // Daily "log your symptoms" nudge through the expected bleed days (2–5).
+    if (settings.duringPeriod) {
+      for (let day = 2; day <= PERIOD_LEN_DEFAULT; day++) {
+        out.push({
+          id: TYPE_BASE.duringPeriod + day,
+          copyKey: 'duringPeriod',
+          args: { day },
+          at: atTime(addDays(fromYmd(active.start), day - 1), settings.reminderTime),
+        });
+      }
+    }
+    // "Did it end? Don't forget to log."
+    if (settings.periodEndConfirm) {
+      out.push({
+        id: TYPE_BASE.periodEndConfirm,
+        copyKey: 'endConfirm',
+        args: { day: settings.endReminderDay },
+        at: atTime(addDays(fromYmd(active.start), settings.endReminderDay), settings.reminderTime),
+      });
+    }
   }
 
   return out
@@ -150,6 +165,7 @@ const COPY: Record<string, { title: string; body: (a: Record<string, number | st
   upcoming: { title: 'Period coming up', body: a => `Your period may start in ${a.days} day${a.days === 1 ? '' : 's'}.` },
   startDay: { title: 'Period may start today', body: () => 'Today is your predicted start day.' },
   startConfirm: { title: 'Did your period start?', body: () => 'Tap to log it so your predictions stay accurate.' },
+  duringPeriod: { title: 'How are you feeling?', body: () => 'Log today’s flow and symptoms while your period is on.' },
   endConfirm: { title: 'Did your period end?', body: a => `It's been ${a.day} days — don't forget to log the end.` },
   ovulation: { title: 'Ovulation day', body: () => 'Today is your predicted ovulation day.' },
   fertileStart: { title: 'Fertile window starting', body: () => 'Your predicted fertile window begins today.' },

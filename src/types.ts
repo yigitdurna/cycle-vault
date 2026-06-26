@@ -155,6 +155,8 @@ export interface NotificationSettings {
   upcomingPeriod: boolean;
   periodStartDay: boolean;
   periodStartConfirm: boolean;
+  /** Daily "log your symptoms" nudge during an ongoing period. */
+  duringPeriod: boolean;
   periodEndConfirm: boolean;
   ovulation: boolean;
   fertileWindow: boolean;
@@ -172,6 +174,7 @@ export const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   upcomingPeriod: true,
   periodStartDay: true,
   periodStartConfirm: true,
+  duringPeriod: false,
   periodEndConfirm: true,
   ovulation: false, // off so the default install is fertility-neutral
   fertileWindow: false,
