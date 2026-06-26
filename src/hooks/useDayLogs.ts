@@ -5,6 +5,26 @@ import { ymd } from '../lib/cycle-math';
 const STORAGE_KEY = 'cycle-tracker-daylogs-v1';
 const NOTE_MAX_LENGTH = 500;
 
+/**
+ * True only if a day log carries at least one symptom/metric. A log whose
+ * fields were all cleared (but whose key still lingers in storage with an
+ * append-only `history`) returns false, so the calendar won't show a "logged"
+ * dot for an effectively empty day.
+ */
+export function dayLogHasData(log: DayLog | undefined): boolean {
+  if (!log) return false;
+  return Boolean(
+    log.mood?.length ||
+    log.energy ||
+    log.cramps ||
+    log.sleep ||
+    log.flow ||
+    log.pain ||
+    log.note ||
+    log.functionalImpact !== undefined,
+  );
+}
+
 function loadLogs(): DayLogs {
   try {
     return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');

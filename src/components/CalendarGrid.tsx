@@ -14,6 +14,7 @@ import {
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ymd } from '../lib/cycle-math';
+import { dayLogHasData } from '../hooks/useDayLogs';
 import type { PhaseResult, DayLogs } from '../types';
 
 interface CalendarGridProps {
@@ -136,7 +137,7 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
           const periodFill = getPeriodFill(phase);
           const dot = getPhaseDot(phase, hideFertility);
           const inRange = isInRange(day);
-          const hasSymptom = inMonth && dayLogs && dateStr in dayLogs;
+          const hasSymptom = inMonth && dayLogs && dayLogHasData(dayLogs[dateStr]);
           const tappable = !selectable && onDayTap && inMonth;
 
           return (
