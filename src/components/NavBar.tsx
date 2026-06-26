@@ -1,12 +1,13 @@
 import { motion } from 'motion/react';
 import {
   Calendar as CalendarIcon,
+  LayoutDashboard,
   History as HistoryIcon,
   Settings,
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-export type Tab = 'calendar' | 'history' | 'settings';
+export type Tab = 'home' | 'calendar' | 'history' | 'settings';
 
 interface NavBarProps {
   activeTab: Tab;
@@ -49,6 +50,12 @@ export function NavBar({ activeTab, onTabChange }: NavBarProps) {
           onClick={() => onTabChange('calendar')}
           icon={CalendarIcon}
           label="Calendar"
+        />
+        <NavButton
+          active={activeTab === 'home'}
+          onClick={() => onTabChange('home')}
+          icon={LayoutDashboard}
+          label="Dashboard"
         />
         <NavButton
           active={activeTab === 'history'}

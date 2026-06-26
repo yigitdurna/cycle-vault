@@ -1,12 +1,9 @@
 import { motion } from 'motion/react';
-import { X, Calendar as CalendarIcon, Droplets } from 'lucide-react';
+import { X } from 'lucide-react';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { SymptomPills } from '../components/SymptomPills';
-import { StatCard } from '../components/StatCard';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
-import { TodayInsightsPanel } from '../components/TodayInsightsPanel';
-import { InsightsPanel } from '../components/InsightsPanel';
-import type { Cycle, PhaseInfo, PhaseResult, Insight, DayLog, DayLogs } from '../types';
+import type { Cycle, PhaseResult, DayLog, DayLogs } from '../types';
 import { fromYmd, ymd, niceShort } from '../lib/cycle-math';
 
 interface CalendarViewProps {
@@ -16,16 +13,9 @@ interface CalendarViewProps {
   todayLog: DayLog | undefined;
   onUpdateTodayLog: (log: Partial<DayLog>) => void;
   hideFertility?: boolean;
-  // --- summary (folded in from the former Dashboard) ---
   activeCycle: Cycle | null;
   onEndCycle: () => void;
-  nextPeriod: { date: string; daysToNext: number } | null;
-  cycleDay: number | null;
-  todayUIPhase: PhaseInfo;
-  todayInsights: Insight[];
-  insights: Insight[];
-  hasEnoughData: boolean;
-  // --- guided period selection ---
+  /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
   onStillOngoing: () => void;
@@ -34,11 +24,10 @@ interface CalendarViewProps {
 
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle, nextPeriod, cycleDay, todayUIPhase, todayInsights, insights, hasEnoughData,
+  activeCycle, onEndCycle,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const selecting = selectionStart !== null;
-  const hasCycles = cycleDay !== null || activeCycle !== null;
 
   return (
     <motion.div
@@ -126,42 +115,10 @@ export function CalendarView({
             </div>
           </div>
 
-          {/* At-a-glance summary */}
-          {hasCycles && (
-            <>
-              <div className="flex items-center gap-2 px-1">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: todayUIPhase.color }} />
-                <span className="text-sm font-medium">{todayUIPhase.name} phase</span>
-              </div>
-              <div className="flex gap-4">
-                <StatCard
-                  label="Next Period"
-                  value={nextPeriod ? `${nextPeriod.daysToNext} ${nextPeriod.daysToNext === 1 ? 'Day' : 'Days'}` : '—'}
-                  icon={CalendarIcon}
-                />
-                <StatCard
-                  label="Cycle Day"
-                  value={cycleDay ? `Day ${cycleDay}` : '—'}
-                  icon={Droplets}
-                />
-              </div>
-            </>
-          )}
-
           {/* Today's quick log */}
           <div className="glass rounded-[2rem] p-6">
             <SymptomPills log={todayLog} onUpdate={onUpdateTodayLog} />
           </div>
-
-          {/* Insights */}
-          {hasCycles && <TodayInsightsPanel insights={todayInsights} />}
-          {hasCycles && <InsightsPanel insights={insights} hasEnoughData={hasEnoughData} />}
-
-          {!hasCycles && (
-            <div className="glass rounded-[2rem] p-6 text-center">
-              <p className="text-ink/60">Tap a date above to log your first period.</p>
-            </div>
-          )}
         </>
       )}
     </motion.div>
