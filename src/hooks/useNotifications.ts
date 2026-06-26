@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { scheduleAllNotifications } from '../lib/notifications';
+import { createTranslator, type Locale } from '../i18n';
 import type { Cycle, NotificationSettings } from '../types';
 
 /**
@@ -16,6 +17,7 @@ export function useNotifications(
   hideFertility: boolean,
   defaultLen: number,
   onLogStart: (startDate: string) => void,
+  locale: Locale = 'en',
 ) {
   const onLogStartRef = useRef(onLogStart);
   onLogStartRef.current = onLogStart;
@@ -32,12 +34,13 @@ export function useNotifications(
       const { LocalNotifications } = await import('@capacitor/local-notifications');
       const { App } = await import('@capacitor/app');
 
+      const at = createTranslator(localeRef.current);
       await LocalNotifications.registerActionTypes({
         types: [{
           id: 'PERIOD_START_CONFIRM',
           actions: [
-            { id: 'YES', title: 'Yes, log it', foreground: true },
-            { id: 'NO', title: 'Not yet' },
+            { id: 'YES', title: at('notif.actionYes'), foreground: true },
+            { id: 'NO', title: at('notif.actionNo') },
           ],
         }],
       });
@@ -54,7 +57,7 @@ export function useNotifications(
       // Reschedule on foreground so the rolling window slides forward.
       const appSub = await App.addListener('appStateChange', ({ isActive }) => {
         if (isActive) {
-          scheduleAllNotifications(notificationsRef.current, cyclesRef.current, hideFertilityRef.current, defaultLenRef.current);
+          scheduleAllNotifications(notificationsRef.current, cyclesRef.current, hideFertilityRef.current, defaultLenRef.current, localeRef.current);
         }
       });
 
@@ -70,9 +73,10 @@ export function useNotifications(
   const notificationsRef = useRef(notifications); notificationsRef.current = notifications;
   const hideFertilityRef = useRef(hideFertility); hideFertilityRef.current = hideFertility;
   const defaultLenRef = useRef(defaultLen); defaultLenRef.current = defaultLen;
+  const localeRef = useRef(locale); localeRef.current = locale;
 
   // Reschedule whenever the inputs change (cancel-all then re-add inside).
   useEffect(() => {
-    scheduleAllNotifications(notifications, cycles, hideFertility, defaultLen);
-  }, [cycles, notifications, hideFertility, defaultLen]);
+    scheduleAllNotifications(notifications, cycles, hideFertility, defaultLen, locale);
+  }, [cycles, notifications, hideFertility, defaultLen, locale]);
 }

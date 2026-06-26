@@ -1,6 +1,33 @@
 import type { Cycle, CyclePhase, DayLog, DayLogs, PhaseSymptomPattern, CycleLengthAlert, Insight } from '../types';
 import { getPhaseForDate, diff } from './cycle-math';
 import { phaseTypeToUI } from '../types';
+import { defaultT, listJoin, phaseName, phaseNameLower, capitalizeFirst, type TFunc, type Locale } from '../i18n';
+
+/** Catalog leaf for a tracked symptom's mid-sentence label. */
+const SYMPTOM_LABEL_KEY: Record<string, string> = {
+  cramps: 'symptomLabelCramps',
+  energy: 'symptomLabelEnergy',
+  mood: 'symptomLabelMood',
+  pain: 'symptomLabelPain',
+  flow: 'symptomLabelFlow',
+  sleep: 'symptomLabelSleep',
+};
+
+/** Catalog leaf for a 1–3 severity word. */
+const SEVERITY_WORD_KEY: Record<number, string> = {
+  1: 'severityWordMild',
+  2: 'severityWordModerate',
+  3: 'severityWordStrong',
+};
+
+function symptomLabel(t: TFunc, symptom: string): string {
+  const key = SYMPTOM_LABEL_KEY[symptom];
+  return key ? t(`insights.${key}`) : symptom;
+}
+
+function severityWord(t: TFunc, severity: number): string {
+  return t(`insights.${SEVERITY_WORD_KEY[severity] ?? SEVERITY_WORD_KEY[2]}`);
+}
 
 /**
  * Returns the UI phase name for a date, or null if unknown.
@@ -83,7 +110,7 @@ const DEVIATION_THRESHOLD = 3; // days
  * significantly from the user's median. Requires >= 3 cycles
  * (need at least 2 lengths to compute a median, then 1 to compare).
  */
-export function getCycleLengthAlert(cycles: Cycle[]): CycleLengthAlert | null {
+export function getCycleLengthAlert(cycles: Cycle[], t: TFunc = defaultT): CycleLengthAlert | null {
   // Need >= 4 cycles: 3 lengths to compute a stable median, 1 to compare against.
   // 3 cycles only gives 1 historical data point — statistically meaningless.
   if (cycles.length < 4) return null;
@@ -111,29 +138,20 @@ export function getCycleLengthAlert(cycles: Cycle[]): CycleLengthAlert | null {
 
   if (Math.abs(deviation) <= DEVIATION_THRESHOLD) return null;
 
-  const direction = deviation > 0 ? 'late' : 'early';
+  const direction = t(deviation > 0 ? 'insights.cycleDirectionLate' : 'insights.cycleDirectionEarly');
+  const roundedMedian = Math.round(median);
   return {
     currentLength,
-    medianLength: Math.round(median),
+    medianLength: roundedMedian,
     deviation,
-    message: `Your last period arrived ${Math.abs(deviation)} days ${direction} (cycle was ${currentLength} days vs your usual ${Math.round(median)}).`,
+    message: t('insights.cycleLengthMessage', {
+      days: Math.abs(deviation),
+      direction,
+      current: currentLength,
+      usual: roundedMedian,
+    }),
   };
 }
-
-const SYMPTOM_LABELS: Record<string, string> = {
-  cramps: 'cramps',
-  energy: 'energy changes',
-  mood: 'mood shifts',
-  pain: 'pain',
-  flow: 'flow changes',
-  sleep: 'sleep changes',
-};
-
-const SEVERITY_WORDS: Record<number, string> = {
-  1: 'mild',
-  2: 'moderate',
-  3: 'strong',
-};
 
 /**
  * Generate a 1-2 sentence description for a phase based on the user's data.
@@ -143,6 +161,7 @@ export function getPersonalizedPhaseDescription(
   logs: DayLogs,
   cycles: Cycle[],
   phase: CyclePhase,
+  t: TFunc = defaultT,
 ): string | null {
   if (cycles.length < 2) return null;
 
@@ -157,22 +176,19 @@ export function getPersonalizedPhaseDescription(
 
   for (const p of phasePatterns) {
     const pct = Math.round(p.frequency * 100);
-    const label = SYMPTOM_LABELS[p.symptom] || p.symptom;
+    const label = symptomLabel(t, p.symptom);
 
     if (p.avgSeverity !== undefined) {
-      const severity = SEVERITY_WORDS[Math.round(p.avgSeverity)] || 'moderate';
-      parts.push(`${severity} ${label} (${pct}% of the time)`);
+      const severity = severityWord(t, Math.round(p.avgSeverity));
+      parts.push(t('insights.personalizedPartSeverity', { severity, label, pct }));
     } else {
-      parts.push(`${label} (${pct}% of the time)`);
+      parts.push(t('insights.personalizedPart', { label, pct }));
     }
   }
 
-  if (parts.length === 1) {
-    return `Based on your history, you tend to experience ${parts[0]} during this phase.`;
-  }
-
-  const last = parts.pop();
-  return `Based on your history, you tend to experience ${parts.join(', ')} and ${last} during this phase.`;
+  const joined = listJoin(parts, t('insights.listAnd'));
+  const key = parts.length === 1 ? 'insights.personalizedSingle' : 'insights.personalizedMultiple';
+  return t(key, { parts: joined });
 }
 
 const MAX_INSIGHTS = 4;
@@ -186,6 +202,8 @@ const MIN_FREQUENCY_FOR_INSIGHT = 0.4;
 export function generateInsights(
   logs: DayLogs,
   cycles: Cycle[],
+  t: TFunc = defaultT,
+  locale: Locale = 'en',
 ): Insight[] {
   if (cycles.length < 2) return [];
 
@@ -205,28 +223,27 @@ export function generateInsights(
     seen.add(key);
 
     const pct = Math.round(p.frequency * 100);
-    const label = SYMPTOM_LABELS[p.symptom] || p.symptom;
-    const severityText = p.avgSeverity
-      ? ` (avg ${SEVERITY_WORDS[Math.round(p.avgSeverity)] || 'moderate'})`
-      : '';
+    const label = symptomLabel(t, p.symptom);
+    const descKey = p.avgSeverity ? 'insights.patternDescSeverity' : 'insights.patternDesc';
+    const severity = p.avgSeverity ? severityWord(t, Math.round(p.avgSeverity)) : '';
 
     insights.push({
       id: `pattern-${idCounter++}`,
       category: 'pattern',
-      title: `${capitalize(label)} in ${p.phase}`,
-      description: `You experience ${label}${severityText} in ${pct}% of your ${p.phase.toLowerCase()} days.`,
+      title: capitalizeFirst(t('insights.patternTitle', { label, phase: phaseName(t, p.phase) })),
+      description: t(descKey, { label, severity, pct, phase: phaseNameLower(t, locale, p.phase) }),
       phase: p.phase,
       confidence: p.frequency,
     });
   }
 
   // 2. Cycle length alert → cycle-length insight
-  const alert = getCycleLengthAlert(cycles);
+  const alert = getCycleLengthAlert(cycles, t);
   if (alert) {
     insights.push({
       id: `cycle-len-${idCounter++}`,
       category: 'cycle-length',
-      title: alert.deviation > 0 ? 'Period arrived late' : 'Period arrived early',
+      title: t(alert.deviation > 0 ? 'insights.periodLate' : 'insights.periodEarly'),
       description: alert.message,
       confidence: Math.min(1, 0.5 + Math.abs(alert.deviation) / 20),
     });
@@ -235,30 +252,6 @@ export function generateInsights(
   insights.sort((a, b) => b.confidence - a.confidence);
   return insights.slice(0, MAX_INSIGHTS);
 }
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-// Immediate, actionable tip per phase — shown regardless of data availability
-const PHASE_TIPS: Record<CyclePhase, { title: string; description: string }> = {
-  Menstrual: {
-    title: 'Rest is productive',
-    description: 'Your body is doing significant work right now. Prioritize sleep, warmth, and gentle movement.',
-  },
-  Follicular: {
-    title: 'Energy is building',
-    description: 'Estrogen is rising. Good timing for new projects, workouts, and social plans.',
-  },
-  Ovulation: {
-    title: 'Peak energy window',
-    description: 'Communication and confidence tend to peak here. A good time for important conversations or bold moves.',
-  },
-  Luteal: {
-    title: 'Focus and wind down',
-    description: 'Great for deep, concentrated work early in this phase. Plan lighter days as it progresses.',
-  },
-};
 
 /**
  * Generate 1–3 insights relevant to today specifically.
@@ -270,16 +263,17 @@ export function getTodayInsights(
   logs: DayLogs,
   cycles: Cycle[],
   phase: CyclePhase,
+  t: TFunc = defaultT,
+  locale: Locale = 'en',
 ): Insight[] {
   const insights: Insight[] = [];
-  const tip = PHASE_TIPS[phase];
 
   // 1. Phase tip — always shown
   insights.push({
     id: 'today-phase-tip',
     category: 'prediction',
-    title: tip.title,
-    description: tip.description,
+    title: t(`insights.tip${phase}Title`),
+    description: t(`insights.tip${phase}Desc`),
     phase,
     confidence: 1,
   });
@@ -291,16 +285,15 @@ export function getTodayInsights(
   // 2. Heads-up about the most common symptom for this phase
   const topPattern = patterns.find(p => p.phase === phase && p.frequency >= 0.5);
   if (topPattern) {
-    const label = SYMPTOM_LABELS[topPattern.symptom] || topPattern.symptom;
+    const label = symptomLabel(t, topPattern.symptom);
     const pct = Math.round(topPattern.frequency * 100);
-    const severityText = topPattern.avgSeverity
-      ? ` (usually ${SEVERITY_WORDS[Math.round(topPattern.avgSeverity)] || 'moderate'})`
-      : '';
+    const descKey = topPattern.avgSeverity ? 'insights.headsUpDescSeverity' : 'insights.headsUpDesc';
+    const severity = topPattern.avgSeverity ? severityWord(t, Math.round(topPattern.avgSeverity)) : '';
     insights.push({
       id: 'today-heads-up',
       category: 'pattern',
-      title: `${capitalize(label)} likely today`,
-      description: `You've logged ${label}${severityText} in ${pct}% of your ${phase.toLowerCase()} days. Plan accordingly.`,
+      title: capitalizeFirst(t('insights.headsUpTitle', { label })),
+      description: t(descKey, { label, severity, pct, phase: phaseNameLower(t, locale, phase) }),
       phase,
       confidence: topPattern.frequency,
     });
@@ -320,12 +313,16 @@ export function getTodayInsights(
       const pattern = patterns.find(p => p.symptom === sym && p.phase === phase);
       // Only flag if we have history for this symptom in this phase AND it's rare
       if (pattern && pattern.totalDaysInPhase >= 3 && pattern.frequency < 0.25) {
-        const label = SYMPTOM_LABELS[sym] || sym;
+        const label = symptomLabel(t, sym);
         insights.push({
           id: 'today-unusual',
           category: 'anomaly',
-          title: `Unusual ${label} today`,
-          description: `You don't usually experience ${label} during ${phase.toLowerCase()} — only ${Math.round(pattern.frequency * 100)}% of these days historically.`,
+          title: capitalizeFirst(t('insights.unusualTitle', { label })),
+          description: t('insights.unusualDesc', {
+            label,
+            phase: phaseNameLower(t, locale, phase),
+            pct: Math.round(pattern.frequency * 100),
+          }),
           phase,
           confidence: 0.7,
         });

@@ -8,6 +8,7 @@
  */
 import { addDays, fromYmd, ymd, getNextPeriodDate, getCycleStats } from './cycle-math';
 import type { Cycle, NotificationSettings } from '../types';
+import { createTranslator, type Locale } from '../i18n';
 
 const TYPE_BASE = {
   upcomingPeriod: 1_000_000,
@@ -161,29 +162,22 @@ export function planNotifications(
     .slice(0, MAX_PENDING);
 }
 
-// --- Copy (English; localizable later via the i18n catalog) ---
-
-const COPY: Record<string, { title: string; body: (a: Record<string, number | string>) => string }> = {
-  upcoming: { title: 'Period coming up', body: a => `Your period may start in ${a.days} day${a.days === 1 ? '' : 's'}.` },
-  startDay: { title: 'Period may start today', body: () => 'Today is your predicted start day.' },
-  startConfirm: { title: 'Did your period start?', body: () => 'Tap to log it so your predictions stay accurate.' },
-  duringPeriod: { title: 'How are you feeling?', body: () => 'Log today’s flow and symptoms while your period is on.' },
-  endConfirm: { title: 'Did your period end?', body: a => `It's been ${a.day} days — don't forget to log the end.` },
-  ovulation: { title: 'Ovulation day', body: () => 'Today is your predicted ovulation day.' },
-  fertileStart: { title: 'Fertile window starting', body: () => 'Your predicted fertile window begins today.' },
-  tipMenstrual: { title: 'Be kind to yourself', body: () => 'Menstrual phase — rest and hydration help. Listen to your body.' },
-  tipFertile: { title: 'Fertile phase', body: () => "You're entering your fertile phase." },
-};
+// --- Copy: resolved from the i18n catalog keyed by copyKey + locale ---
+// Each planned notification's `copyKey` maps to catalog keys
+// `notif.<copyKey>Title` / `notif.<copyKey>Body` (e.g. 'upcoming' →
+// notif.upcomingTitle / notif.upcomingBody). Bodies interpolate p.args.
 
 /**
  * I/O wrapper: cancel-all then re-add. No-op on web. Safe to call any time —
- * checks permission and the master switch internally.
+ * checks permission and the master switch internally. `locale` selects the
+ * language of the notification copy.
  */
 export async function scheduleAllNotifications(
   settings: NotificationSettings,
   cycles: Cycle[],
   hideFertility: boolean,
   defaultLen: number,
+  locale: Locale = 'en',
 ): Promise<void> {
   const { Capacitor } = await import('@capacitor/core');
   if (!Capacitor.isNativePlatform()) return;
@@ -203,18 +197,17 @@ export async function scheduleAllNotifications(
   const planned = planNotifications(settings, cycles, hideFertility, defaultLen);
   if (!planned.length) return;
 
+  const t = createTranslator(locale);
+
   await LocalNotifications.schedule({
-    notifications: planned.map(p => {
-      const c = COPY[p.copyKey];
-      return {
-        id: p.id,
-        title: c.title,
-        body: c.body(p.args),
-        schedule: { at: p.at, allowWhileIdle: true },
-        ...(p.actionTypeId ? { actionTypeId: p.actionTypeId } : {}),
-        ...(p.extra ? { extra: p.extra } : {}),
-      };
-    }),
+    notifications: planned.map(p => ({
+      id: p.id,
+      title: t(`notif.${p.copyKey}Title`),
+      body: t(`notif.${p.copyKey}Body`, p.args),
+      schedule: { at: p.at, allowWhileIdle: true },
+      ...(p.actionTypeId ? { actionTypeId: p.actionTypeId } : {}),
+      ...(p.extra ? { extra: p.extra } : {}),
+    })),
   });
 }
 

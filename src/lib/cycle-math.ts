@@ -35,21 +35,22 @@ export function diff(a: string, b: string): number {
   return Math.round((fromYmd(a).getTime() - fromYmd(b).getTime()) / (24 * 60 * 60 * 1000));
 }
 
-/** "15 March 2025" */
-export function nice(s: string): string {
-  return fromYmd(s).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+/** "15 March 2025" — pass the active locale so months/weekdays localize. */
+export function nice(s: string, locale?: string): string {
+  return fromYmd(s).toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-/** "15 Mar" */
-export function niceShort(s: string): string {
-  return fromYmd(s).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+/** "15 Mar" — pass the active locale so the month abbreviation localizes. */
+export function niceShort(s: string, locale?: string): string {
+  return fromYmd(s).toLocaleDateString(locale, { day: 'numeric', month: 'short' });
 }
 
-/** "15th of Mar, 2025" */
-export function niceFull(s: string): string {
+/** "15th of Mar, 2025" (English ordinal form; other locales just localize the
+ *  month). Pass the active locale so the month abbreviation localizes. */
+export function niceFull(s: string, locale?: string): string {
   const d = fromYmd(s);
   const day = d.getDate();
-  const month = d.toLocaleDateString(undefined, { month: 'short' });
+  const month = d.toLocaleDateString(locale, { month: 'short' });
   const year = d.getFullYear();
 
   let suffix = 'th';
