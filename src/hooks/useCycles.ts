@@ -312,7 +312,13 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
             let precomputed: Cycle[] = [...cyclesRef.current];
             for (const c of importedCycles) {
               if (!c.start || !DATE_RE.test(c.start)) continue;
-              const incoming: Cycle = { start: c.start, end: c.end || null };
+              // Validate end the same way CSV import does: only accept a
+              // well-formed date that is not before the start; otherwise null.
+              const validEnd =
+                typeof c.end === 'string' && DATE_RE.test(c.end) && c.end >= c.start
+                  ? c.end
+                  : null;
+              const incoming: Cycle = { start: c.start, end: validEnd };
               const hadOverlap = precomputed.some(existing => cyclesOverlap(existing, incoming));
               precomputed = precomputed.filter(existing => !cyclesOverlap(existing, incoming));
               if (hadOverlap || !precomputed.some(existing => existing.start === c.start)) {

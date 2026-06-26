@@ -66,6 +66,41 @@ describe('import does not drop cycles added in-session (stale-closure regression
   });
 });
 
+describe('importJSON validates the end date', () => {
+  it('stores null for a malformed end (non-date)', async () => {
+    const { result } = renderHook(() => useCycles());
+    const file = new File([JSON.stringify({
+      cycles: [{ start: '2026-05-01', end: 'not-a-date' }],
+    })], 'backup.json', { type: 'application/json' });
+
+    await act(async () => { await result.current.importJSON(file); });
+
+    expect(result.current.cycles).toEqual([{ start: '2026-05-01', end: null }]);
+  });
+
+  it('stores null for an end that is before the start', async () => {
+    const { result } = renderHook(() => useCycles());
+    const file = new File([JSON.stringify({
+      cycles: [{ start: '2026-06-01', end: '2026-05-20' }],
+    })], 'backup.json', { type: 'application/json' });
+
+    await act(async () => { await result.current.importJSON(file); });
+
+    expect(result.current.cycles).toEqual([{ start: '2026-06-01', end: null }]);
+  });
+
+  it('keeps a well-formed end >= start', async () => {
+    const { result } = renderHook(() => useCycles());
+    const file = new File([JSON.stringify({
+      cycles: [{ start: '2026-07-01', end: '2026-07-05' }],
+    })], 'backup.json', { type: 'application/json' });
+
+    await act(async () => { await result.current.importJSON(file); });
+
+    expect(result.current.cycles).toEqual([{ start: '2026-07-01', end: '2026-07-05' }]);
+  });
+});
+
 describe('importCSV handles the app’s own symptom CSV (column-by-name + dedupe)', () => {
   it('reads cycles from Period Start/End columns, not the Date column', async () => {
     const { result } = renderHook(() => useCycles());
