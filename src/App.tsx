@@ -63,7 +63,7 @@ export default function App() {
   // "did your period start?" notification starts a period on the predicted day.
   useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null), locale);
 
-  const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog);
+  const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog, t, locale);
 
   const handleUpdateLog = (partial: Partial<DayLog>) => {
     const today = ymd(new Date());
