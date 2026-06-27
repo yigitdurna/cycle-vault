@@ -189,14 +189,6 @@ export const translations = {
       de: 'Periode beginnt am {date} — tippe den letzten Tag an, oder:',
     },
     stillOngoing: { en: 'Still ongoing', tr: 'Hâlâ devam ediyor', de: 'Läuft noch' },
-
-    // Long-range estimated period dates (for planning ahead)
-    estimatedUpcoming: { en: 'Estimated upcoming periods', tr: 'Tahmini sonraki regller', de: 'Voraussichtliche Perioden' },
-    estimateNote: {
-      en: 'Approximate — for planning, not medical use.',
-      tr: 'Yaklaşık — planlama içindir, tıbbi kullanım için değildir.',
-      de: 'Ungefähr — zur Planung, nicht für medizinische Zwecke.',
-    },
   },
 
   // ---------------------------------------------------------------------------

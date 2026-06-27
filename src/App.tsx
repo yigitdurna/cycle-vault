@@ -4,7 +4,7 @@ import { cn } from './lib/utils';
 import { useCycles } from './hooks/useCycles';
 import { useDayLogs } from './hooks/useDayLogs';
 import { useSettings } from './hooks/useSettings';
-import { getCycleStats, ymd, getUpcomingPeriods } from './lib/cycle-math';
+import { getCycleStats, ymd } from './lib/cycle-math';
 import { NavBar, type Tab } from './components/NavBar';
 import { HomeView } from './views/HomeView';
 import { CalendarView } from './views/CalendarView';
@@ -110,12 +110,6 @@ export default function App() {
   );
 
   const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
-
-  // Estimated next period dates for planning ahead (shown on the Calendar).
-  const upcomingPeriods = useMemo(
-    () => getUpcomingPeriods(cycles, customCycleLength ?? 28, 6),
-    [cycles, customCycleLength],
-  );
 
   // Guided period logging from the calendar: a date tapped as "start" enters
   // end-selection mode; the next tap (>= start) commits both atomically. An
@@ -224,7 +218,6 @@ export default function App() {
               onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
               nextPeriod={nextPeriod}
               currentPhase={todayUIPhase.name}
-              upcomingPeriods={upcomingPeriods}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}
