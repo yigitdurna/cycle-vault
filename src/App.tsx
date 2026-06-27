@@ -11,7 +11,6 @@ import { CalendarView } from './views/CalendarView';
 import { HistoryView } from './views/HistoryView';
 import { SettingsView } from './views/SettingsView';
 import { LogPeriodSheet } from './components/LogPeriodSheet';
-import { Logo } from './components/Logo';
 import { DayDetailSheet } from './components/DayDetailSheet';
 import { useInsights } from './hooks/useInsights';
 import { useNotifications } from './hooks/useNotifications';
@@ -112,12 +111,6 @@ export default function App() {
 
   const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
 
-  // Fraction of the current cycle elapsed — drives the countdown bar's ring.
-  const cycleProgress = useMemo(() => {
-    const med = getCycleStats(cycles, customCycleLength ?? 28)?.med ?? (customCycleLength ?? 28);
-    return cycleDay ? Math.min(1, cycleDay / med) : 0;
-  }, [cycles, cycleDay, customCycleLength]);
-
   // Guided period logging from the calendar: a date tapped as "start" enters
   // end-selection mode; the next tap (>= start) commits both atomically. An
   // earlier tap re-anchors the start; "still ongoing" leaves the end open.
@@ -185,7 +178,7 @@ export default function App() {
         {/* Header */}
         <header className="flex items-center mb-12">
           <div className="flex items-center gap-3">
-            <Logo size={32} />
+            <img src={import.meta.env.BASE_URL + 'flower.png'} alt="" className="w-8 h-8" />
             <h1 className="text-2xl font-bold lowercase font-serif">cycle vault</h1>
           </div>
         </header>
@@ -224,7 +217,6 @@ export default function App() {
               activeCycle={activeCycle}
               onEndCycle={() => { setEditingCycle(null); setLogSheetOpen(true); }}
               nextPeriod={nextPeriod}
-              cycleProgress={cycleProgress}
               selectionStart={pendingStart}
               onRangeSelect={handleRangeSelect}
               onStillOngoing={handleStillOngoing}
