@@ -94,6 +94,10 @@ export function getCycleStats(cycles: Cycle[], fallback = 28): CycleStats | null
 
 // --- Core Prediction Logic ---
 
+/** How far ahead we estimate periods (~12 months). Calendar-only prediction
+ *  drifts further out, so estimates beyond this are not shown. */
+export const MAX_FORECAST_DAYS = 372;
+
 export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28): PhaseResult | null {
   const stats = getCycleStats(cycles, fallback);
   if (!stats) return null;
@@ -120,14 +124,17 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
   // 3. Calculate Position in Cycle (no modulo — daysSince is used directly)
   const daysSince = diff(dateStr, anchorStart);
 
-  // If way past expected cycle, don't predict phases
-  if (daysSince >= stats.med * 1.5) return null;
-
-  // Determine if this is the current or next predicted cycle
-  const cycleNum = daysSince >= stats.med ? 1 : 0;
-  const dayInCycle = cycleNum === 1 ? daysSince - stats.med : daysSince;
-
   const med = stats.med;
+
+  // Estimate up to ~12 months ahead so users can plan around future periods
+  // (e.g. holidays). Beyond that the calendar-only estimate drifts too much to
+  // be meaningful, so we stop predicting.
+  if (daysSince > MAX_FORECAST_DAYS) return null;
+
+  // Which predicted cycle the date falls in: 0 = the current cycle, 1+ = future
+  // estimated cycles. Future cycles show ONLY the estimated period days.
+  const cycleNum = Math.floor(daysSince / med);
+  const dayInCycle = daysSince - cycleNum * med;
 
   // 1-based cycle day (cycle day 1 = the first day of the period). Every phase
   // boundary below is expressed as a cycle-day number, so they are compared
@@ -143,11 +150,10 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
     periodLen = diff(anchorObj.end, anchorObj.start) + 1;
   }
 
-  // If we are predicting the NEXT cycle (cycleNum === 1) but the user has
-  // already recorded an actual next cycle starting after the anchor, the
-  // prediction has been superseded. The gap was a late period — don't colour
-  // those days as predicted period.
-  if (cycleNum === 1) {
+  // For any FUTURE estimated cycle (cycleNum >= 1): if the user has already
+  // recorded an actual cycle starting after the anchor, every estimate from
+  // this anchor is superseded — don't colour those days as predicted period.
+  if (cycleNum >= 1) {
     const hasActualNextCycle = stats.starts.some(s => s > anchorStart!);
     if (hasActualNextCycle) return null;
   }
@@ -157,8 +163,10 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
     return { type: 'period', day: cycleDay, recorded: false };
   }
 
-  // If we are in Cycle 1 (Next Cycle), ONLY show period.
-  if (cycleNum === 1) return null;
+  // Future estimated cycles only surface their period days — the fertile /
+  // ovulation / luteal detail below is for the current cycle only, where it's
+  // accurate enough to be useful.
+  if (cycleNum >= 1) return null;
 
   // Evidence-based fertile window (Bull et al. 2019), as cycle-day numbers.
   // Luteal phase mean 12.4 days → ovulation ≈ cycle day (med − 14); the
@@ -207,6 +215,39 @@ export function getNextPeriodDate(cycles: Cycle[], fallback = 28): { date: strin
 
   const daysToNext = diff(nextStart, todayYmd);
   return { date: nextStart, daysToNext };
+}
+
+export interface UpcomingPeriod {
+  /** Predicted period start date, "YYYY-MM-DD". */
+  date: string;
+  /** Days from today until that date (negative if already overdue). */
+  daysToNext: number;
+}
+
+/**
+ * Estimated start dates of the next `count` periods from today, for planning
+ * ahead (e.g. holidays). Each is anchorStart + median × n. Only future dates
+ * (today or later) are returned, capped to the ~12-month forecast horizon.
+ * Returns [] when there's no data or the prediction has been superseded by a
+ * more recently recorded cycle.
+ */
+export function getUpcomingPeriods(cycles: Cycle[], fallback = 28, count = 6): UpcomingPeriod[] {
+  const stats = getCycleStats(cycles, fallback);
+  if (!stats) return [];
+
+  const todayYmd = ymd(new Date());
+  const anchorStart = stats.starts.filter(s => s <= todayYmd).pop() || stats.starts[0];
+  if (!anchorStart) return [];
+
+  // A real cycle logged after the anchor supersedes these estimates.
+  if (stats.starts.some(s => s > anchorStart)) return [];
+
+  const out: UpcomingPeriod[] = [];
+  for (let n = 1; out.length < count && stats.med * n <= MAX_FORECAST_DAYS; n++) {
+    const date = ymd(addDays(fromYmd(anchorStart), stats.med * n));
+    if (date >= todayYmd) out.push({ date, daysToNext: diff(date, todayYmd) });
+  }
+  return out;
 }
 
 /** Get current cycle day (1-based) relative to most recent cycle start */

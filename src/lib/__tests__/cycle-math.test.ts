@@ -8,6 +8,7 @@ import {
   getCycleStats,
   getPhaseForDate,
   getNextPeriodDate,
+  getUpcomingPeriods,
   getCurrentCycleDay,
   getCycleHistoryStats,
 } from '../cycle-math';
@@ -320,9 +321,23 @@ describe('getPhaseForDate', () => {
     expect(getPhaseForDate('2026-02-05', cycles)).toBeNull();
   });
 
-  it('returns null when date is more than 1.5× the median past the anchor', () => {
-    // daysSince = diff('2026-03-15', '2026-01-01') = 73 > 1.5 * 28 = 42
+  it('estimates period days for cycles months ahead (for planning)', () => {
+    // 2 cycles out: 2026-01-01 + 56 days = 2026-02-26 → predicted period day 1
+    const result = getPhaseForDate('2026-02-26', baseCycles);
+    expect(result?.type).toBe('period');
+    expect(result?.recorded).toBe(false);
+    expect(result?.day).toBe(1);
+  });
+
+  it('returns null for a non-period day in a future estimated cycle', () => {
+    // 2026-03-15 = 73 days after anchor → cycle 2, ~cycle day 18 (luteal-ish);
+    // future estimated cycles only surface their period days.
     expect(getPhaseForDate('2026-03-15', baseCycles)).toBeNull();
+  });
+
+  it('stops estimating beyond the ~12-month forecast horizon', () => {
+    // 2027-06-01 ≈ 516 days after the anchor, past MAX_FORECAST_DAYS (372).
+    expect(getPhaseForDate('2027-06-01', baseCycles)).toBeNull();
   });
 
   describe('active (open) period', () => {
@@ -448,6 +463,40 @@ describe('getNextPeriodDate', () => {
     const result = getNextPeriodDate(cycles);
     expect(result).not.toBeNull();
     expect(result!.date).toBe('2026-03-04');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getUpcomingPeriods  (requires fake system clock)
+// ---------------------------------------------------------------------------
+
+describe('getUpcomingPeriods', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('returns [] with no cycles', () => {
+    expect(getUpcomingPeriods([])).toEqual([]);
+  });
+
+  it('projects the next N period dates spaced by the median', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 10, 12, 0, 0)); // 2026-01-10
+    const cycles: Cycle[] = [{ start: '2026-01-01', end: '2026-01-05' }];
+    const up = getUpcomingPeriods(cycles, 28, 4);
+    expect(up.length).toBe(4);
+    expect(up[0].date).toBe('2026-01-29'); // anchor + median
+    expect(up[1].date).toBe('2026-02-26'); // + median
+    expect(diff(up[1].date, up[0].date)).toBe(28); // spaced by the median
+    expect(up.every(p => p.daysToNext > 0)).toBe(true); // all in the future
+  });
+
+  it('returns [] when a later recorded cycle supersedes the estimate', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 1, 5, 12, 0, 0)); // 2026-02-05
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: '2026-01-05' },
+      { start: '2026-02-10', end: '2026-02-14' }, // logged after the anchor
+    ];
+    expect(getUpcomingPeriods(cycles)).toEqual([]);
   });
 });
 

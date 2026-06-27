@@ -4,7 +4,7 @@ import { CalendarGrid } from '../components/CalendarGrid';
 import { SymptomPills } from '../components/SymptomPills';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
 import type { Cycle, PhaseResult, DayLog, DayLogs, CyclePhase } from '../types';
-import { fromYmd, ymd, niceShort } from '../lib/cycle-math';
+import { fromYmd, ymd, niceShort, type UpcomingPeriod } from '../lib/cycle-math';
 import { useTranslation } from '../i18n';
 
 /** Dot + border colour for the next-period banner, keyed by the current phase
@@ -28,6 +28,8 @@ interface CalendarViewProps {
   nextPeriod: { date: string; daysToNext: number } | null;
   /** Today's UI phase — colours the next-period banner per the legend. */
   currentPhase: CyclePhase;
+  /** Estimated upcoming period start dates, for planning ahead. */
+  upcomingPeriods: UpcomingPeriod[];
   /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
@@ -37,7 +39,7 @@ interface CalendarViewProps {
 
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle, nextPeriod, currentPhase,
+  activeCycle, onEndCycle, nextPeriod, currentPhase, upcomingPeriods,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const { t, locale } = useTranslation();
@@ -146,6 +148,26 @@ export function CalendarView({
               <span className="text-xs font-medium text-ink/70">{t('calendar.legendLuteal')}</span>
             </div>
           </div>
+
+          {/* Estimated upcoming periods — for planning ahead */}
+          {upcomingPeriods.length > 0 && (
+            <div className="glass rounded-[2rem] p-5">
+              <p className="text-xs text-ink/55 uppercase tracking-wider font-medium">
+                {t('calendar.estimatedUpcoming')}
+              </p>
+              <div className="mt-3 space-y-1.5">
+                {upcomingPeriods.map(p => (
+                  <div key={p.date} className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-ink/80">{niceShort(p.date, locale)}</span>
+                    <span className="text-ink/45 capitalize">
+                      {fromYmd(p.date).toLocaleDateString(locale, { weekday: 'long' })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-ink/45 mt-3">{t('calendar.estimateNote')}</p>
+            </div>
+          )}
 
           {/* Today's quick log */}
           <div className="glass rounded-[2rem] p-6">
