@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   // Vite outputs the production build here. Build with `npm run build:ios`
   // (which sets CAP_BUILD=1 so Vite uses base '/' instead of '/cycle-vault/').
   webDir: 'dist',
-  backgroundColor: '#0A0A0A',
+  backgroundColor: '#FAF6F1',
   ios: {
     contentInset: 'always',
   },
