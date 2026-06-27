@@ -53,7 +53,7 @@ export const translations = {
     delete: { en: 'Delete', tr: 'Sil', de: 'Löschen' },
     save: { en: 'Save', tr: 'Kaydet', de: 'Speichern' },
     saved: { en: 'Saved', tr: 'Kaydedildi', de: 'Gespeichert' },
-    done: { en: 'Done', tr: 'Bitti', de: 'Fertig' },
+    done: { en: 'Done', tr: 'Tamam', de: 'Fertig' },
     yes: { en: 'Yes', tr: 'Evet', de: 'Ja' },
     no: { en: 'No', tr: 'Hayır', de: 'Nein' },
     close: { en: 'Close', tr: 'Kapat', de: 'Schließen' },
@@ -78,15 +78,15 @@ export const translations = {
     // CycleRing center: "Day {day}"
     ringDay: { en: 'Day {day}', tr: '{day}. gün', de: 'Tag {day}' },
     // CycleRing subtitle: "{phase} Phase"
-    ringPhase: { en: '{phase} Phase', tr: '{phase} fazı', de: '{phase}phase' },
+    ringPhase: { en: '{phase} Phase', tr: '{phase} fazı', de: '{phase}' },
 
     // StatCard labels
     nextPeriod: { en: 'Next Period', tr: 'Sonraki Regl', de: 'Nächste Periode' },
     cycleDay: { en: 'Cycle Day', tr: 'Döngü Günü', de: 'Zyklustag' },
 
     // StatCard value: next-period countdown. Plural-sensitive.
-    nextPeriodDayOne: { en: '{count} Day', tr: '{count} Gün', de: '{count} Tag' },
-    nextPeriodDayOther: { en: '{count} Days', tr: '{count} Gün', de: '{count} Tage' },
+    nextPeriodDayOne: { en: '{count} Day', tr: '{count} gün', de: '{count} Tag' },
+    nextPeriodDayOther: { en: '{count} Days', tr: '{count} gün', de: '{count} Tage' },
 
     // StatCard value: current cycle day
     cycleDayValue: { en: 'Day {day}', tr: '{day}. gün', de: 'Tag {day}' },
@@ -128,7 +128,7 @@ export const translations = {
     avgCycle: { en: 'Avg cycle', tr: 'Ort. döngü', de: 'Ø Zyklus' },
     avgPeriod: { en: 'Avg period', tr: 'Ort. regl', de: 'Ø Periode' },
     range: { en: 'Range', tr: 'Aralık', de: 'Spanne' },
-    recent: { en: 'Recent', tr: 'Son', de: 'Zuletzt' },
+    recent: { en: 'Recent', tr: 'Son kayıtlar', de: 'Zuletzt' },
     regular: { en: 'regular', tr: 'düzenli', de: 'regelmäßig' },
     mostlyRegular: { en: 'mostly regular', tr: 'çoğunlukla düzenli', de: 'meist regelmäßig' },
     irregular: { en: 'irregular', tr: 'düzensiz', de: 'unregelmäßig' },
@@ -148,7 +148,7 @@ export const translations = {
     legendPeriod: { en: 'Period', tr: 'Regl', de: 'Periode' },
     legendFertile: { en: 'Fertile', tr: 'Doğurgan', de: 'Fruchtbar' },
     legendOvulation: { en: 'Ovulation', tr: 'Yumurtlama', de: 'Eisprung' },
-    legendLuteal: { en: 'Luteal', tr: 'Luteal', de: 'Luteal' },
+    legendLuteal: { en: 'Luteal', tr: 'Luteal faz', de: 'Lutealphase' },
     legendLogged: { en: 'Logged', tr: 'Kayıtlı', de: 'Erfasst' },
 
     // Upcoming section
@@ -233,7 +233,7 @@ export const translations = {
     // Slim privacy banner (shorter than privacyBody below)
     privacyBannerShort: {
       en: 'Everything stays on your device. No accounts, no cloud, no tracking.',
-      tr: 'Her şey cihazında kalır. Hesap yok, bulut yok, takip yok.',
+      tr: 'Her şey cihazında kalır. Hesap yok, bulut yok, izleme yok.',
       de: 'Alles bleibt auf deinem Gerät. Keine Konten, keine Cloud, kein Tracking.',
     },
     hideFertilityShort: {
@@ -264,11 +264,11 @@ export const translations = {
     groupTips: { en: 'Tips', tr: 'İpuçları', de: 'Tipps' },
     reminderUpcoming: { en: 'Upcoming period', tr: 'Yaklaşan regl', de: 'Bevorstehende Periode' },
     leadDayBefore: { en: '{count}d before', tr: '{count}g önce', de: '{count}T vorher' },
-    reminderStartDay: { en: 'Period start day', tr: 'Regl başlangıç günü', de: 'Periodenstart-Tag' },
+    reminderStartDay: { en: 'Period start day', tr: 'Regl başlangıç günü', de: 'Periodenbeginn' },
     reminderStartConfirm: { en: 'Did your period start?', tr: 'Reglin başladı mı?', de: 'Hat deine Periode begonnen?' },
     reminderDaily: { en: 'Daily symptom reminder', tr: 'Günlük belirti hatırlatıcısı', de: 'Tägliche Symptom-Erinnerung' },
     reminderEndConfirm: { en: 'Did it end? (log it)', tr: 'Bitti mi? (kaydet)', de: 'Vorbei? (erfassen)' },
-    reminderOvulation: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprung-Tag' },
+    reminderOvulation: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprungtag' },
     reminderFertile: { en: 'Fertile window start', tr: 'Doğurgan dönem başlangıcı', de: 'Beginn der fruchtbaren Tage' },
     reminderWellness: { en: 'Phase wellness tips', tr: 'Faz sağlık ipuçları', de: 'Phasen-Wellness-Tipps' },
 
@@ -283,7 +283,7 @@ export const translations = {
     privacyTitle: { en: 'Your data is private', tr: 'Verilerin gizli', de: 'Deine Daten sind privat' },
     privacyBody: {
       en: 'Everything stays on your device. No accounts, no cloud, no tracking. We never see your data.',
-      tr: 'Her şey cihazında kalır. Hesap yok, bulut yok, takip yok. Verilerini asla görmeyiz.',
+      tr: 'Her şey cihazında kalır. Hesap yok, bulut yok, izleme yok. Verilerini asla görmeyiz.',
       de: 'Alles bleibt auf deinem Gerät. Keine Konten, keine Cloud, kein Tracking. Wir sehen deine Daten nie.',
     },
 
@@ -307,9 +307,9 @@ export const translations = {
     // Tracking section
     sectionTracking: { en: 'Tracking', tr: 'Takip', de: 'Tracking' },
     hideFertilityTitle: {
-      en: 'Hide fertility & ovulation',
-      tr: 'Doğurganlık ve yumurtlamayı gizle',
-      de: 'Fruchtbarkeit & Eisprung ausblenden',
+      en: 'Hide fertility',
+      tr: 'Doğurganlığı gizle',
+      de: 'Fruchtbarkeit ausblenden',
     },
     hideFertilityBody: {
       en: "For when you're not trying to conceive — removes fertile-window and ovulation predictions everywhere.",
@@ -349,9 +349,9 @@ export const translations = {
 
     // Import section
     sectionImport: { en: 'Import', tr: 'İçe Aktar', de: 'Importieren' },
-    importJsonTitle: { en: 'Import JSON', tr: 'JSON içe aktar', de: 'JSON importieren' },
+    importJsonTitle: { en: 'Import JSON', tr: "JSON'u içe aktar", de: 'JSON importieren' },
     importJsonBody: { en: 'Restore from a backup file', tr: 'Bir yedek dosyasından geri yükle', de: 'Aus einer Sicherungsdatei wiederherstellen' },
-    importCsvTitle: { en: 'Import CSV', tr: 'CSV içe aktar', de: 'CSV importieren' },
+    importCsvTitle: { en: 'Import CSV', tr: "CSV'yi içe aktar", de: 'CSV importieren' },
     importCsvBody: { en: 'Add cycles from a CSV file', tr: 'Bir CSV dosyasından döngü ekle', de: 'Zyklen aus einer CSV-Datei hinzufügen' },
 
     // Import result toasts
@@ -411,13 +411,13 @@ export const translations = {
     titleStart: { en: 'Start Cycle', tr: 'Döngü Başlat', de: 'Zyklus starten' },
     titleEnd: { en: 'End Cycle', tr: 'Döngüyü Bitir', de: 'Zyklus beenden' },
     titleLog: { en: 'Log Period', tr: 'Regl Kaydet', de: 'Periode erfassen' },
-    titleEdit: { en: 'Edit Period', tr: 'Reglyi Düzenle', de: 'Periode bearbeiten' },
+    titleEdit: { en: 'Edit Period', tr: 'Regli Düzenle', de: 'Periode bearbeiten' },
 
     // Save button labels per mode
     saveStart: { en: 'Start Cycle', tr: 'Döngü Başlat', de: 'Zyklus starten' },
     saveEnd: { en: 'End Cycle', tr: 'Döngüyü Bitir', de: 'Zyklus beenden' },
     saveLog: { en: 'Log Period', tr: 'Regl Kaydet', de: 'Periode erfassen' },
-    saveEdit: { en: 'Update Period', tr: 'Reglyi Güncelle', de: 'Periode aktualisieren' },
+    saveEdit: { en: 'Update Period', tr: 'Regli Güncelle', de: 'Periode aktualisieren' },
 
     // Mode tabs
     tabStart: { en: 'Start Cycle', tr: 'Döngü Başlat', de: 'Zyklus starten' },
@@ -431,7 +431,7 @@ export const translations = {
 
     // DayDetailSheet period actions
     startPeriodHere: { en: 'Start a period here', tr: 'Burada regl başlat', de: 'Hier eine Periode starten' },
-    endPeriodOnDay: { en: 'End period on this day', tr: 'Reglini bu günde bitir', de: 'Periode an diesem Tag beenden' },
+    endPeriodOnDay: { en: 'End period on this day', tr: 'Reglini bu gün bitir', de: 'Periode an diesem Tag beenden' },
   },
 
   // ---------------------------------------------------------------------------
@@ -524,10 +524,10 @@ export const translations = {
   // ---------------------------------------------------------------------------
   phases: {
     // Phase display names (used in CycleRing "{phase} Phase", PhaseCard, etc.)
-    menstrual: { en: 'Menstrual', tr: 'Menstrüel', de: 'Menstruation' },
-    follicular: { en: 'Follicular', tr: 'Foliküler', de: 'Follikel' },
-    ovulation: { en: 'Ovulation', tr: 'Yumurtlama', de: 'Eisprung' },
-    luteal: { en: 'Luteal', tr: 'Luteal', de: 'Luteal' },
+    menstrual: { en: 'Menstrual', tr: 'Menstrüel', de: 'Menstruationsphase' },
+    follicular: { en: 'Follicular', tr: 'Foliküler', de: 'Follikelphase' },
+    ovulation: { en: 'Ovulation', tr: 'Yumurtlama', de: 'Ovulationsphase' },
+    luteal: { en: 'Luteal', tr: 'Luteal', de: 'Lutealphase' },
 
     // Phase descriptions
     menstrualDesc: {
@@ -543,7 +543,7 @@ export const translations = {
     ovulationDesc: {
       en: 'Estimated fertile window. Calendar-based estimates are approximate — not for medical use.',
       tr: 'Tahmini doğurgan dönem. Takvim temelli tahminler yaklaşıktır — tıbbi kullanım için değildir.',
-      de: 'Geschätzte fruchtbare Tage. Kalenderbasierte Schätzungen sind ungefähr — nicht für medizinische Zwecke.',
+      de: 'Geschätzte fruchtbare Tage. Kalenderbasierte Schätzungen sind ungefähr — nicht für medizinische Zwecke geeignet.',
     },
     lutealDesc: {
       en: 'Progesterone rises. Focus on grounding activities and self-care.',
@@ -583,26 +583,26 @@ export const translations = {
 
     // Severity words used inside insight templates (lowercase, mid-sentence).
     // SEVERITY_WORDS in insights.ts: 1=mild, 2=moderate, 3=strong.
-    severityWordMild: { en: 'mild', tr: 'hafif', de: 'leichte' },
-    severityWordModerate: { en: 'moderate', tr: 'orta', de: 'mittlere' },
-    severityWordStrong: { en: 'strong', tr: 'şiddetli', de: 'starke' },
+    severityWordMild: { en: 'mild', tr: 'hafif', de: 'leicht' },
+    severityWordModerate: { en: 'moderate', tr: 'orta', de: 'mittel' },
+    severityWordStrong: { en: 'strong', tr: 'şiddetli', de: 'stark' },
 
     // --- Pattern insight (generateInsights) ---
     // Title: "{label} in {phase}" — label is capitalized symptom label.
-    patternTitle: { en: '{label} in {phase}', tr: '{phase} fazında {label}', de: '{label} in der {phase}phase' },
+    patternTitle: { en: '{label} in {phase}', tr: '{phase} fazında {label}', de: '{label} in der {phase}' },
     // Description without severity:
     // "You experience {label} in {pct}% of your {phase} days."
     patternDesc: {
       en: 'You experience {label} in {pct}% of your {phase} days.',
       tr: '{phase} günlerinin %{pct} kadarında {label} yaşıyorsun.',
-      de: 'Du erlebst {label} an {pct}% deiner {phase}-Tage.',
+      de: 'Du erlebst {label} an {pct}% deiner Tage in der {phase}.',
     },
     // Description with severity:
     // "You experience {label} (avg {severity}) in {pct}% of your {phase} days."
     patternDescSeverity: {
       en: 'You experience {label} (avg {severity}) in {pct}% of your {phase} days.',
       tr: '{phase} günlerinin %{pct} kadarında {label} (ort. {severity}) yaşıyorsun.',
-      de: 'Du erlebst {label} (durchschn. {severity}) an {pct}% deiner {phase}-Tage.',
+      de: 'Du erlebst {label} (durchschnittlich {severity}) an {pct}% deiner Tage in der {phase}.',
     },
 
     // --- Cycle-length insight (getCycleLengthAlert) ---
@@ -612,8 +612,8 @@ export const translations = {
     // "Your last period arrived {days} days {direction} (cycle was {current} days vs your usual {usual})."
     cycleLengthMessage: {
       en: 'Your last period arrived {days} days {direction} (cycle was {current} days vs your usual {usual}).',
-      tr: 'Son reglin {days} gün {direction} geldi (döngü {current} gün sürdü, alışılmış {usual} güne karşı).',
-      de: 'Deine letzte Periode kam {days} Tage {direction} (Zyklus dauerte {current} Tage statt der üblichen {usual}).',
+      tr: 'Son reglin {days} gün {direction} geldi (döngü {current} gün sürdü; normalde {usual} gündü).',
+      de: 'Deine letzte Periode kam {days} Tage {direction} (der Zyklus dauerte {current} Tage statt der üblichen {usual} Tage).',
     },
     cycleDirectionLate: { en: 'late', tr: 'geç', de: 'zu spät' },
     cycleDirectionEarly: { en: 'early', tr: 'erken', de: 'zu früh' },
@@ -652,14 +652,14 @@ export const translations = {
     headsUpDesc: {
       en: "You've logged {label} in {pct}% of your {phase} days. Plan accordingly.",
       tr: '{phase} günlerinin %{pct} kadarında {label} kaydettin. Buna göre planla.',
-      de: 'Du hast {label} an {pct}% deiner {phase}-Tage erfasst. Plane entsprechend.',
+      de: 'Du hast {label} an {pct}% deiner Tage in der {phase} erfasst. Plane entsprechend.',
     },
     // Description with severity:
     // "You've logged {label} (usually {severity}) in {pct}% of your {phase} days. Plan accordingly."
     headsUpDescSeverity: {
       en: "You've logged {label} (usually {severity}) in {pct}% of your {phase} days. Plan accordingly.",
       tr: '{phase} günlerinin %{pct} kadarında {label} (genellikle {severity}) kaydettin. Buna göre planla.',
-      de: 'Du hast {label} (meist {severity}) an {pct}% deiner {phase}-Tage erfasst. Plane entsprechend.',
+      de: 'Du hast {label} (meist {severity}) an {pct}% deiner Tage in der {phase} erfasst. Plane entsprechend.',
     },
 
     // --- Today: unusual symptom flag (getTodayInsights) ---
@@ -670,7 +670,7 @@ export const translations = {
     unusualDesc: {
       en: "You don't usually experience {label} during {phase} — only {pct}% of these days historically.",
       tr: '{phase} sırasında genellikle {label} yaşamazsın — geçmişte bu günlerin yalnızca %{pct} kadarında.',
-      de: 'Du erlebst {label} normalerweise nicht während der {phase}phase — historisch nur an {pct}% dieser Tage.',
+      de: 'Du erlebst {label} normalerweise nicht während der {phase} — historisch nur an {pct}% dieser Tage.',
     },
 
     // --- Personalized phase description (getPersonalizedPhaseDescription) ---
@@ -697,7 +697,7 @@ export const translations = {
     personalizedPartSeverity: {
       en: '{severity} {label} ({pct}% of the time)',
       tr: '{severity} {label} (zamanın %{pct} kadarı)',
-      de: '{severity} {label} ({pct}% der Zeit)',
+      de: '{label} ({severity}, {pct}% der Zeit)',
     },
     // List joiner words for assembling {parts}: items joined by ", " and a final "and".
     listAnd: { en: 'and', tr: 've', de: 'und' },
@@ -738,7 +738,7 @@ export const translations = {
     estimatesApproximate: {
       en: 'Calendar-based estimates are approximate — not for medical use.',
       tr: 'Takvim temelli tahminler yaklaşıktır — tıbbi kullanım için değildir.',
-      de: 'Kalenderbasierte Schätzungen sind ungefähr — nicht für medizinische Zwecke.',
+      de: 'Kalenderbasierte Schätzungen sind ungefähr — nicht für medizinische Zwecke geeignet.',
     },
   },
 
@@ -776,10 +776,10 @@ export const translations = {
     endConfirmTitle: { en: 'Did your period end?', tr: 'Reglin bitti mi?', de: 'Ist deine Periode vorbei?' },
     endConfirmBody: {
       en: "You've been logged for {day} days — don't forget to log the end.",
-      tr: '{day} gündür kayıttasın — bitişi kaydetmeyi unutma.',
-      de: 'Du erfasst seit {day} Tagen — vergiss nicht, das Ende einzutragen.',
+      tr: 'Reglin {day} gündür kayıtlı — bitişi kaydetmeyi unutma.',
+      de: 'Deine Periode ist seit {day} Tagen erfasst — vergiss nicht, das Ende einzutragen.',
     },
-    ovulationTitle: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprung-Tag' },
+    ovulationTitle: { en: 'Ovulation day', tr: 'Yumurtlama günü', de: 'Eisprungtag' },
     ovulationBody: {
       en: 'Today is your predicted ovulation day.',
       tr: 'Bugün tahmini yumurtlama günün.',
@@ -797,11 +797,11 @@ export const translations = {
       tr: 'Menstrüel faz — dinlenmek ve su içmek iyi gelir. Bedenini dinle.',
       de: 'Menstruationsphase — Ruhe und Flüssigkeit helfen. Höre auf deinen Körper.',
     },
-    tipFertileTitle: { en: 'Fertile phase', tr: 'Doğurgan faz', de: 'Fruchtbare Phase' },
+    tipFertileTitle: { en: 'Fertile phase', tr: 'Doğurgan dönem', de: 'Fruchtbare Tage' },
     tipFertileBody: {
       en: "You're entering your fertile phase.",
-      tr: 'Doğurgan fazına giriyorsun.',
-      de: 'Du trittst in deine fruchtbare Phase ein.',
+      tr: 'Doğurgan dönemine giriyorsun.',
+      de: 'Deine fruchtbaren Tage beginnen.',
     },
     actionYes: { en: 'Yes, log it', tr: 'Evet, kaydet', de: 'Ja, erfassen' },
     actionNo: { en: 'Not yet', tr: 'Henüz değil', de: 'Noch nicht' },

@@ -60,12 +60,12 @@ describe('helpers', () => {
   it('phaseName resolves the localized phase noun', () => {
     expect(phaseName(createTranslator('en'), 'Menstrual')).toBe('Menstrual');
     expect(phaseName(createTranslator('tr'), 'Ovulation')).toBe('Yumurtlama');
-    expect(phaseName(createTranslator('de'), 'Ovulation')).toBe('Eisprung');
+    expect(phaseName(createTranslator('de'), 'Ovulation')).toBe('Ovulationsphase');
   });
 
   it('phaseNameLower lowercases only for English', () => {
     expect(phaseNameLower(createTranslator('en'), 'en', 'Menstrual')).toBe('menstrual');
-    expect(phaseNameLower(createTranslator('de'), 'de', 'Menstrual')).toBe('Menstruation');
+    expect(phaseNameLower(createTranslator('de'), 'de', 'Menstrual')).toBe('Menstruationsphase');
   });
 
   it('listJoin builds a localized list with a final conjunction', () => {
