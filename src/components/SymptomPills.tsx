@@ -227,7 +227,7 @@ export function SymptomPills({ log, onUpdate }: SymptomPillsProps) {
 
   return (
     <div className="w-full mt-8">
-      <p className="text-sm text-ink/45 font-serif italic mb-4">
+      <p className="text-sm text-ink/55 font-medium mb-4">
         {t('symptoms.howFeeling')}
       </p>
 

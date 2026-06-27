@@ -146,7 +146,8 @@ export const translations = {
     mostlyRegular: { en: 'mostly regular', tr: 'çoğunlukla düzenli', de: 'meist regelmäßig' },
     irregular: { en: 'irregular', tr: 'düzensiz', de: 'unregelmäßig' },
     dayCycle: { en: '{count}-day cycle', tr: '{count} günlük döngü', de: '{count}-Tage-Zyklus' },
-    current: { en: 'current', tr: 'şu an', de: 'aktuell' },
+    // Latest (ongoing) cycle — show how far into it we are, not a vague "current".
+    currentDay: { en: 'day {count}', tr: '{count}. gün', de: 'Tag {count}' },
     cyclesTrackedOne: { en: '{count} cycle tracked', tr: '{count} döngü takip edildi', de: '{count} Zyklus erfasst' },
     cyclesTrackedOther: { en: '{count} cycles tracked', tr: '{count} döngü takip edildi', de: '{count} Zyklen erfasst' },
   },
@@ -250,9 +251,9 @@ export const translations = {
       de: 'Alles bleibt auf deinem Gerät. Keine Konten, keine Cloud, kein Tracking.',
     },
     hideFertilityShort: {
-      en: "For when you're not trying to conceive.",
-      tr: 'Hamile kalmaya çalışmadığın zamanlar için.',
-      de: 'Für Zeiten, in denen du nicht schwanger werden möchtest.',
+      en: 'Show only your period on the calendar.',
+      tr: 'Takvimde yalnızca regli göster.',
+      de: 'Nur deine Periode im Kalender anzeigen.',
     },
 
     // Reminders group
@@ -320,9 +321,9 @@ export const translations = {
     // Tracking section
     sectionTracking: { en: 'Tracking', tr: 'Takip', de: 'Tracking' },
     hideFertilityTitle: {
-      en: 'Hide fertility',
-      tr: 'Doğurganlığı gizle',
-      de: 'Fruchtbarkeit ausblenden',
+      en: 'Hide cycle indicators',
+      tr: 'Döngü göstergelerini gizle',
+      de: 'Zyklus-Anzeigen ausblenden',
     },
     hideFertilityBody: {
       en: "For when you're not trying to conceive — removes fertile-window and ovulation predictions everywhere.",
@@ -330,9 +331,9 @@ export const translations = {
       de: 'Für Zeiten, in denen du nicht schwanger werden möchtest — entfernt überall die Vorhersagen zu fruchtbaren Tagen und Eisprung.',
     },
     hideFertilityAria: {
-      en: 'Hide fertility and ovulation predictions',
-      tr: 'Doğurganlık ve yumurtlama tahminlerini gizle',
-      de: 'Vorhersagen zu Fruchtbarkeit und Eisprung ausblenden',
+      en: 'Hide cycle indicators',
+      tr: 'Döngü göstergelerini gizle',
+      de: 'Zyklus-Anzeigen ausblenden',
     },
 
     // Data info

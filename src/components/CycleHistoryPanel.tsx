@@ -1,5 +1,5 @@
 import { TrendingUp } from 'lucide-react';
-import { getCycleHistoryStats, niceShort } from '../lib/cycle-math';
+import { getCycleHistoryStats, niceShort, diff, ymd } from '../lib/cycle-math';
 import type { Cycle } from '../types';
 import { useTranslation } from '../i18n';
 
@@ -61,7 +61,9 @@ export function CycleHistoryPanel({ cycles }: { cycles: Cycle[] }) {
               {niceShort(c.start, locale)}{c.end ? ` – ${niceShort(c.end, locale)}` : ''}
             </span>
             <span className="text-ink/55 tabular-nums">
-              {c.length ? t('historyStats.dayCycle', { count: c.length }) : t('historyStats.current')}
+              {c.length
+                ? t('historyStats.dayCycle', { count: c.length })
+                : t('historyStats.currentDay', { count: diff(ymd(new Date()), c.start) + 1 })}
             </span>
           </div>
         ))}

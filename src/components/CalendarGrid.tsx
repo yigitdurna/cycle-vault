@@ -28,14 +28,9 @@ interface CalendarGridProps {
   dayLogs?: DayLogs;
   /** Called when a day is tapped (non-selectable mode) */
   onDayTap?: (dateStr: string) => void;
-  /** Childfree / not-TTC mode: render fertile + ovulation days as follicular */
+  /** Hide cycle indicators: when on, the calendar shows only the period — no
+   *  fertile / ovulation / luteal dots. */
   hideFertility?: boolean;
-}
-
-/** Collapse fertile/ovulation to follicular when fertility is hidden. */
-function effectiveType(type: PhaseResult['type'], hideFertility: boolean): PhaseResult['type'] {
-  if (hideFertility && (type === 'fertile' || type === 'ovulation')) return 'follicular';
-  return type;
 }
 
 /** Period days get a strong fill (recorded) or a soft fill (predicted). Other
@@ -47,10 +42,11 @@ function getPeriodFill(phase: PhaseResult | null): string {
     : 'bg-menstrual/25 text-menstrual font-semibold';
 }
 
-/** Small indicator dot for non-period phases. */
+/** Small indicator dot for non-period phases. With indicators hidden, no dots
+ *  show at all — the calendar shows only the period. */
 function getPhaseDot(phase: PhaseResult | null, hideFertility: boolean): string | null {
-  if (!phase) return null;
-  switch (effectiveType(phase.type, hideFertility)) {
+  if (!phase || hideFertility) return null;
+  switch (phase.type) {
     case 'fertile': return 'bg-follicular';
     case 'ovulation': return 'bg-ovulation';
     case 'luteal': return 'bg-luteal';

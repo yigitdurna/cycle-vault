@@ -23,7 +23,8 @@ export function TodayInsightsPanel({ insights }: TodayInsightsPanelProps) {
       <p className="text-xs text-ink/55 uppercase tracking-wider font-medium mb-3">
         {t('insights.today')}
       </p>
-      <div className="flex gap-3 flex-wrap">
+      {/* Compact, glanceable chips — title only, no long descriptions. */}
+      <div className="flex gap-2 flex-wrap">
         {insights.map((insight, i) => {
           const config = CATEGORY_CONFIG[insight.category];
           const Icon = config.icon;
@@ -33,15 +34,10 @@ export function TodayInsightsPanel({ insights }: TodayInsightsPanelProps) {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.08 }}
-              className="glass rounded-3xl p-4 flex-1 min-w-[140px] flex flex-col gap-2"
+              className="glass rounded-2xl px-3.5 py-2.5 flex items-center gap-2"
             >
-              <div className="w-7 h-7 rounded-xl bg-ink/[0.05] flex items-center justify-center shrink-0">
-                <Icon size={14} className={config.color} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold leading-snug">{insight.title}</p>
-                <p className="text-xs text-ink/55 mt-0.5 leading-relaxed line-clamp-3">{insight.description}</p>
-              </div>
+              <Icon size={14} className={`${config.color} shrink-0`} />
+              <p className="text-xs font-medium leading-snug">{insight.title}</p>
             </motion.div>
           );
         })}

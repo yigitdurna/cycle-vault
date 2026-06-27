@@ -123,29 +123,28 @@ export function CalendarView({
 
       {!selecting && (
         <>
-          {/* Legend */}
-          <div className="glass rounded-3xl p-4 flex flex-wrap justify-center gap-x-5 gap-y-2.5">
-            <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-menstrual" />
-              <span className="text-xs font-medium text-ink/70">{t('calendar.legendPeriod')}</span>
+          {/* Legend — hidden entirely when cycle indicators are off (only the
+              period shows on the calendar, which needs no legend). */}
+          {!hideFertility && (
+            <div className="glass rounded-3xl p-4 flex flex-wrap justify-center gap-x-5 gap-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-menstrual" />
+                <span className="text-xs font-medium text-ink/70">{t('calendar.legendPeriod')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-follicular" />
+                <span className="text-xs font-medium text-ink/70">{t('calendar.legendFertile')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-ovulation" />
+                <span className="text-xs font-medium text-ink/70">{t('calendar.legendOvulation')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3.5 h-3.5 rounded-full bg-luteal" />
+                <span className="text-xs font-medium text-ink/70">{t('calendar.legendLuteal')}</span>
+              </div>
             </div>
-            {!hideFertility && (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-full bg-follicular" />
-                  <span className="text-xs font-medium text-ink/70">{t('calendar.legendFertile')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 rounded-full bg-ovulation" />
-                  <span className="text-xs font-medium text-ink/70">{t('calendar.legendOvulation')}</span>
-                </div>
-              </>
-            )}
-            <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded-full bg-luteal" />
-              <span className="text-xs font-medium text-ink/70">{t('calendar.legendLuteal')}</span>
-            </div>
-          </div>
+          )}
 
           {/* Today's quick log */}
           <div className="glass rounded-[2rem] p-6">
