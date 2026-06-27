@@ -3,9 +3,18 @@ import { X } from 'lucide-react';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { SymptomPills } from '../components/SymptomPills';
 import { ActivePeriodBanner } from '../components/ActivePeriodBanner';
-import type { Cycle, PhaseResult, DayLog, DayLogs } from '../types';
+import type { Cycle, PhaseResult, DayLog, DayLogs, CyclePhase } from '../types';
 import { fromYmd, ymd, niceShort } from '../lib/cycle-math';
 import { useTranslation } from '../i18n';
+
+/** Dot + border colour for the next-period banner, keyed by the current phase
+ *  so it matches the calendar legend (red stays exclusive to an active period). */
+const PHASE_STYLE: Record<CyclePhase, { dot: string; border: string }> = {
+  Menstrual: { dot: 'bg-menstrual', border: 'border-menstrual/30' },
+  Follicular: { dot: 'bg-follicular', border: 'border-follicular/30' },
+  Ovulation: { dot: 'bg-ovulation', border: 'border-ovulation/30' },
+  Luteal: { dot: 'bg-luteal', border: 'border-luteal/30' },
+};
 
 interface CalendarViewProps {
   getPhaseForDate: (dateStr: string) => PhaseResult | null;
@@ -17,6 +26,8 @@ interface CalendarViewProps {
   activeCycle: Cycle | null;
   onEndCycle: () => void;
   nextPeriod: { date: string; daysToNext: number } | null;
+  /** Today's UI phase — colours the next-period banner per the legend. */
+  currentPhase: CyclePhase;
   /** Non-null when picking the end date for a period that starts on this day. */
   selectionStart: string | null;
   onRangeSelect: (date: string) => void;
@@ -26,11 +37,12 @@ interface CalendarViewProps {
 
 export function CalendarView({
   getPhaseForDate, dayLogs, onDayTap, todayLog, onUpdateTodayLog, hideFertility = false,
-  activeCycle, onEndCycle, nextPeriod,
+  activeCycle, onEndCycle, nextPeriod, currentPhase,
   selectionStart, onRangeSelect, onStillOngoing, onCancelSelection,
 }: CalendarViewProps) {
   const { t, locale } = useTranslation();
   const selecting = selectionStart !== null;
+  const phaseStyle = PHASE_STYLE[currentPhase];
 
   return (
     <motion.div
@@ -45,11 +57,12 @@ export function CalendarView({
         <ActivePeriodBanner activeCycle={activeCycle} onEndCycle={onEndCycle} />
       )}
       {!selecting && !activeCycle && nextPeriod && (
-        <div className="glass rounded-2xl p-4 flex items-center gap-3 border border-menstrual/30">
-          {/* Pulsing dot — mirrors the in-progress banner's "live" feel */}
+        <div className={`glass rounded-2xl p-4 flex items-center gap-3 border ${phaseStyle.border}`}>
+          {/* Pulsing dot — mirrors the in-progress banner's "live" feel, but
+              coloured by the current phase so red stays exclusive to a period. */}
           <span className="relative flex h-3 w-3 shrink-0">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-menstrual opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-menstrual" />
+            <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${phaseStyle.dot} opacity-75`} />
+            <span className={`relative inline-flex rounded-full h-3 w-3 ${phaseStyle.dot}`} />
           </span>
           <div>
             <p className="text-sm font-semibold">
