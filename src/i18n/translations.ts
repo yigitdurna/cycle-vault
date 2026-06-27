@@ -118,6 +118,19 @@ export const translations = {
       tr: 'İlk reglini kaydetmek için Takvim’e git.',
       de: 'Geh zum Kalender, um deine erste Periode zu erfassen.',
     },
+
+    // Estimated upcoming cycles (dashboard) + data-driven notes
+    upcomingTitle: { en: 'Estimated upcoming cycles', tr: 'Tahmini sonraki döngüler', de: 'Voraussichtliche Zyklen' },
+    estimateNote: {
+      en: 'Approximate — for planning, not medical use.',
+      tr: 'Yaklaşık — planlama içindir, tıbbi kullanım için değildir.',
+      de: 'Ungefähr — zur Planung, nicht für medizinische Zwecke.',
+    },
+    dataNote: {
+      en: 'The more cycles you log, the sharper these estimates get.',
+      tr: 'Ne kadar çok döngü kaydedersen tahminler o kadar netleşir.',
+      de: 'Je mehr Zyklen du erfasst, desto genauer werden diese Schätzungen.',
+    },
   },
 
   // ---------------------------------------------------------------------------

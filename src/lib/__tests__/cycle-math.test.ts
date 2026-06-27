@@ -8,6 +8,7 @@ import {
   getCycleStats,
   getPhaseForDate,
   getNextPeriodDate,
+  getUpcomingPeriods,
   getCurrentCycleDay,
   getCycleHistoryStats,
 } from '../cycle-math';
@@ -409,6 +410,34 @@ describe('getCycleHistoryStats', () => {
     ];
     expect(getCycleHistoryStats(cycles).regularity).toBe('irregular');
   });
+
+  it('treats ~7-day variation as "mostly regular", not irregular (clinical-ish)', () => {
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: null },
+      { start: '2026-01-27', end: null }, // +26
+      { start: '2026-02-26', end: null }, // +30
+      { start: '2026-03-31', end: null }, // +33 → spread = 33 − 26 = 7
+    ];
+    expect(getCycleHistoryStats(cycles).regularity).toBe('mostly regular');
+  });
+
+  it('ignores an old outlier by using only recent cycles', () => {
+    // One ancient long gap, then 6 tight ~28-day cycles. Old approach would call
+    // this irregular; recent-window approach sees only the tight recent cycles.
+    const cycles: Cycle[] = [
+      { start: '2025-01-01', end: null },
+      { start: '2025-03-15', end: null }, // +73 (outlier, far in the past)
+      { start: '2025-04-12', end: null }, // +28
+      { start: '2025-05-10', end: null }, // +28
+      { start: '2025-06-07', end: null }, // +28
+      { start: '2025-07-05', end: null }, // +28
+      { start: '2025-08-02', end: null }, // +28
+      { start: '2025-08-30', end: null }, // +28
+    ];
+    const s = getCycleHistoryStats(cycles);
+    expect(s.medianCycle).toBe(28);
+    expect(s.regularity).toBe('regular');
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -471,6 +500,40 @@ describe('getNextPeriodDate', () => {
     const result = getNextPeriodDate(cycles);
     expect(result).not.toBeNull();
     expect(result!.date).toBe('2026-03-04');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getUpcomingPeriods  (requires fake system clock)
+// ---------------------------------------------------------------------------
+
+describe('getUpcomingPeriods', () => {
+  afterEach(() => vi.useRealTimers());
+
+  it('returns [] with no cycles', () => {
+    expect(getUpcomingPeriods([])).toEqual([]);
+  });
+
+  it('projects start/end ranges spaced by the median, using bleed length', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 10, 12, 0, 0)); // 2026-01-10
+    const cycles: Cycle[] = [{ start: '2026-01-01', end: '2026-01-05' }]; // 5-day bleed
+    const up = getUpcomingPeriods(cycles, 28, 3);
+    expect(up.length).toBe(3);
+    expect(up[0]).toMatchObject({ start: '2026-01-29', end: '2026-02-02' }); // +28, 5-day
+    expect(up[1].start).toBe('2026-02-26');
+    expect(diff(up[1].start, up[0].start)).toBe(28);
+    expect(up.every(p => p.daysToNext > 0)).toBe(true);
+  });
+
+  it('returns [] when a later recorded cycle supersedes the estimate', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 1, 5, 12, 0, 0)); // 2026-02-05
+    const cycles: Cycle[] = [
+      { start: '2026-01-01', end: '2026-01-05' },
+      { start: '2026-02-10', end: '2026-02-14' }, // logged after the anchor
+    ];
+    expect(getUpcomingPeriods(cycles)).toEqual([]);
   });
 });
 

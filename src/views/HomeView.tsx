@@ -7,9 +7,10 @@ import { PhaseCard } from '../components/PhaseCard';
 import { TodayInsightsPanel } from '../components/TodayInsightsPanel';
 import { InsightsPanel } from '../components/InsightsPanel';
 import { CycleHistoryPanel } from '../components/CycleHistoryPanel';
+import { UpcomingCyclesPanel } from '../components/UpcomingCyclesPanel';
 import type { PhaseInfo, PhaseResult, Insight, CyclePhase } from '../types';
 import type { Cycle } from '../types';
-import { getCycleStats } from '../lib/cycle-math';
+import { getCycleStats, type UpcomingPeriod } from '../lib/cycle-math';
 import { useTranslation } from '../i18n';
 
 interface HomeViewProps {
@@ -25,9 +26,10 @@ interface HomeViewProps {
   customCycleLength: number;
   activeCycle: Cycle | null;
   onEndCycle: () => void;
+  upcomingPeriods: UpcomingPeriod[];
 }
 
-export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycles, todayInsights, insights, hasEnoughData, getPhaseDescription, customCycleLength, activeCycle, onEndCycle }: HomeViewProps) {
+export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycles, todayInsights, insights, hasEnoughData, getPhaseDescription, customCycleLength, activeCycle, onEndCycle, upcomingPeriods }: HomeViewProps) {
   const { t } = useTranslation();
   const stats = getCycleStats(cycles, customCycleLength);
   const totalDays = stats?.med ?? customCycleLength;
@@ -74,11 +76,12 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
         <TodayInsightsPanel insights={todayInsights} />
       )}
 
+      {/* Recent cycle history — directly under Today */}
+      {hasCycles && <CycleHistoryPanel cycles={cycles} />}
+
       {hasCycles && (
         <InsightsPanel insights={insights} hasEnoughData={hasEnoughData} />
       )}
-
-      {hasCycles && <CycleHistoryPanel cycles={cycles} />}
 
       {hasCycles ? (
         <PhaseCard phaseInfo={todayUIPhase} description={personalDesc ?? undefined} subtitle={phaseSubtitle} />
@@ -86,6 +89,16 @@ export function HomeView({ todayPhase, todayUIPhase, nextPeriod, cycleDay, cycle
         <div className="glass rounded-[2rem] p-6 mt-8 text-center">
           <p className="text-ink/60">{t('home.headToCalendar')}</p>
         </div>
+      )}
+
+      {/* Estimated upcoming cycles — start/end ranges for planning ahead */}
+      {hasCycles && <UpcomingCyclesPanel upcoming={upcomingPeriods} />}
+
+      {/* Gentle nudge: estimates sharpen as more cycles are logged */}
+      {hasCycles && (
+        <p className="text-[11px] text-ink/40 text-center mt-6 px-6 leading-relaxed">
+          {t('home.dataNote')}
+        </p>
       )}
     </motion.div>
   );

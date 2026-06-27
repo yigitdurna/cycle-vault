@@ -226,6 +226,49 @@ export function getNextPeriodDate(cycles: Cycle[], fallback = 28): { date: strin
   return { date: nextStart, daysToNext };
 }
 
+export interface UpcomingPeriod {
+  /** Estimated period start, "YYYY-MM-DD". */
+  start: string;
+  /** Estimated period end, "YYYY-MM-DD" (start + typical bleed length). */
+  end: string;
+  /** Days from today until the start (negative if already overdue). */
+  daysToNext: number;
+}
+
+/**
+ * Estimated start/end dates of the next `count` periods, for planning ahead
+ * (e.g. holidays). Start = anchorStart + median × n; end = start + typical bleed
+ * length − 1 (averaged from recorded periods, default 5). Future dates only,
+ * capped to the ~12-month horizon. Returns [] when there's no data or a more
+ * recently recorded cycle has superseded the estimate.
+ */
+export function getUpcomingPeriods(cycles: Cycle[], fallback = 28, count = 6): UpcomingPeriod[] {
+  const stats = getCycleStats(cycles, fallback);
+  if (!stats) return [];
+
+  const todayYmd = ymd(new Date());
+  const anchorStart = stats.starts.filter(s => s <= todayYmd).pop() || stats.starts[0];
+  if (!anchorStart) return [];
+
+  // A real cycle logged after the anchor supersedes these estimates.
+  if (stats.starts.some(s => s > anchorStart)) return [];
+
+  // Typical bleed length from recorded (closed) periods, default 5.
+  const periodLens = cycles.filter(c => c.end).map(c => diff(c.end as string, c.start) + 1);
+  const bleed = periodLens.length
+    ? Math.round(periodLens.reduce((a, b) => a + b, 0) / periodLens.length)
+    : 5;
+
+  const out: UpcomingPeriod[] = [];
+  for (let n = 1; out.length < count && stats.med * n <= MAX_FORECAST_DAYS; n++) {
+    const start = ymd(addDays(fromYmd(anchorStart), stats.med * n));
+    if (start < todayYmd) continue;
+    const end = ymd(addDays(fromYmd(start), bleed - 1));
+    out.push({ start, end, daysToNext: diff(start, todayYmd) });
+  }
+  return out;
+}
+
 /** Get current cycle day (1-based) relative to most recent cycle start */
 export function getCurrentCycleDay(cycles: Cycle[], fallback = 28): number | null {
   const stats = getCycleStats(cycles, fallback);
@@ -266,17 +309,25 @@ export function getCycleHistoryStats(cycles: Cycle[]): CycleHistoryStats {
     .filter(c => c.end)
     .map(c => diff(c.end as string, c.start) + 1);
 
-  const medianCycle = lens.length ? Math.round(median(lens)) : null;
-  const shortestCycle = lens.length ? Math.min(...lens) : null;
-  const longestCycle = lens.length ? Math.max(...lens) : null;
+  // Headline stats use RECENT cycles (last 6), matching the prediction engine
+  // and clinical practice (regularity is judged over recent cycles), so one old
+  // outlier cycle no longer dominates the average or the regularity badge.
+  const recentLens = lens.slice(-6);
+
+  const medianCycle = recentLens.length ? Math.round(median(recentLens)) : null;
+  const shortestCycle = recentLens.length ? Math.min(...recentLens) : null;
+  const longestCycle = recentLens.length ? Math.max(...recentLens) : null;
   const avgPeriod = periodLens.length
     ? Math.round(periodLens.reduce((a, b) => a + b, 0) / periodLens.length)
     : null;
 
+  // Regularity = shortest-to-longest variation across recent cycles. Clinical
+  // guidance (FIGO/ACOG) treats cycle-to-cycle variation beyond ~7–9 days as
+  // irregular; we bucket around that boundary. Needs >= 3 recent cycles.
   let regularity: CycleHistoryStats['regularity'] = null;
-  if (lens.length >= 2 && shortestCycle !== null && longestCycle !== null) {
+  if (recentLens.length >= 2 && shortestCycle !== null && longestCycle !== null) {
     const spread = longestCycle - shortestCycle;
-    regularity = spread <= 3 ? 'regular' : spread <= 7 ? 'mostly regular' : 'irregular';
+    regularity = spread <= 4 ? 'regular' : spread <= 9 ? 'mostly regular' : 'irregular';
   }
 
   // Recent cycles newest-first; length is the gap to the NEXT start (null for the latest).

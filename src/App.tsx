@@ -4,7 +4,7 @@ import { cn } from './lib/utils';
 import { useCycles } from './hooks/useCycles';
 import { useDayLogs } from './hooks/useDayLogs';
 import { useSettings } from './hooks/useSettings';
-import { getCycleStats, ymd } from './lib/cycle-math';
+import { getCycleStats, ymd, getUpcomingPeriods } from './lib/cycle-math';
 import { NavBar, type Tab } from './components/NavBar';
 import { HomeView } from './views/HomeView';
 import { CalendarView } from './views/CalendarView';
@@ -111,6 +111,12 @@ export default function App() {
 
   const hasData = cycles.length > 0 || Object.keys(allLogs).length > 0;
 
+  // Estimated upcoming period ranges (start–end) for the dashboard / planning.
+  const upcomingPeriods = useMemo(
+    () => getUpcomingPeriods(cycles, customCycleLength ?? 28, 6),
+    [cycles, customCycleLength],
+  );
+
   // Guided period logging from the calendar: a date tapped as "start" enters
   // end-selection mode; the next tap (>= start) commits both atomically. An
   // earlier tap re-anchors the start; "still ongoing" leaves the end open.
@@ -198,6 +204,7 @@ export default function App() {
               getPhaseDescription={getPhaseDescription}
               customCycleLength={customCycleLength ?? 28}
               activeCycle={activeCycle}
+              upcomingPeriods={upcomingPeriods}
               onEndCycle={() => {
                 setEditingCycle(null);
                 setLogSheetOpen(true);
