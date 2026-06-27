@@ -173,6 +173,14 @@ export function getPhaseForDate(dateStr: string, cycles: Cycle[], fallback = 28)
   const fertileStart = Math.max(periodLen + 1, med - 16);
   const fertileEnd = med - 10;
 
+  // Guard: for implausibly short cycles, or a period long enough to crowd out
+  // the window, the fertile bounds invert. The calendar model isn't meaningful
+  // there, so skip fertile/ovulation/luteal and treat the rest as follicular
+  // rather than mislabelling most of the cycle as luteal.
+  if (fertileEnd < fertileStart) {
+    return { type: 'follicular', day: cycleDay };
+  }
+
   // Absolute start date of THIS (possibly future) estimated cycle.
   const cycleStart = addDays(fromYmd(anchorStart), cycleNum * med);
 

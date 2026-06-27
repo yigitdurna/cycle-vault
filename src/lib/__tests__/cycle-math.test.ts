@@ -341,6 +341,13 @@ describe('getPhaseForDate', () => {
     expect(getPhaseForDate('2027-06-01', baseCycles)).toBeNull();
   });
 
+  it('degrades to follicular for an implausibly short cycle (inverted window)', () => {
+    // med = 15 (custom minimum) → fertileStart = max(6, -1) = 6 > fertileEnd = 5.
+    // The window is invalid, so post-period days are follicular, not luteal.
+    const result = getPhaseForDate('2026-01-10', baseCycles, 15);
+    expect(result?.type).toBe('follicular');
+  });
+
   describe('active (open) period', () => {
     afterEach(() => vi.useRealTimers());
 

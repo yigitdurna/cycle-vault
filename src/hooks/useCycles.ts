@@ -270,7 +270,10 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
           const end = (rows[i][endIdx] ?? '').trim();
           if (DATE_RE.test(start) && !seenStarts.has(start)) {
             seenStarts.add(start);
-            parsed.push({ start, end: DATE_RE.test(end) ? end : null });
+            // Only accept an end date that is valid AND not before the start
+            // (matches the JSON-import guard); otherwise treat as open-ended.
+            const validEnd = DATE_RE.test(end) && end >= start;
+            parsed.push({ start, end: validEnd ? end : null });
           }
         }
 
