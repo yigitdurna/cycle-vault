@@ -283,12 +283,11 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
           let count = 0;
           let precomputed: Cycle[] = [...cyclesRef.current];
           for (const c of parsed) {
-            const hadOverlap = precomputed.some(existing => cyclesOverlap(existing, c));
+            // A later-start import wins over any overlapping cycle (matches
+            // sanitizeCycles): drop overlaps, then add the incoming one.
             precomputed = precomputed.filter(existing => !cyclesOverlap(existing, c));
-            if (hadOverlap || !precomputed.some(existing => existing.start === c.start)) {
-              precomputed.push(c);
-              count++;
-            }
+            precomputed.push(c);
+            count++;
           }
           persist(() => precomputed);
           resolve(count);
@@ -322,12 +321,10 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
                   ? c.end
                   : null;
               const incoming: Cycle = { start: c.start, end: validEnd };
-              const hadOverlap = precomputed.some(existing => cyclesOverlap(existing, incoming));
+              // Later-start import wins over any overlap (see importCSV).
               precomputed = precomputed.filter(existing => !cyclesOverlap(existing, incoming));
-              if (hadOverlap || !precomputed.some(existing => existing.start === c.start)) {
-                precomputed.push(incoming);
-                count++;
-              }
+              precomputed.push(incoming);
+              count++;
             }
             persist(() => precomputed);
           }

@@ -81,6 +81,36 @@ export function useDayLogs() {
     });
   }, [persist]);
 
+  /**
+   * Merge imported day logs into the current set (used by JSON backup import).
+   * Non-destructive: a date the user doesn't have yet is added wholesale; a
+   * date that already exists keeps its current fields but folds in any imported
+   * history snapshots it doesn't already have (deduped by timestamp, capped at
+   * 20). This replaces the old "skip if the date already exists" behavior,
+   * which silently dropped imported logs on any collision.
+   */
+  const mergeLogs = useCallback((imported: DayLogs) => {
+    persist(prev => {
+      const next = { ...prev };
+      for (const [date, incoming] of Object.entries(imported)) {
+        const existing = next[date];
+        if (!existing) {
+          next[date] = incoming;
+          continue;
+        }
+        const seen = new Set((existing.history ?? []).map(h => h.timestamp));
+        const history = [
+          ...(existing.history ?? []),
+          ...(incoming.history ?? []).filter(h => !seen.has(h.timestamp)),
+        ]
+          .sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+          .slice(-20);
+        next[date] = { ...existing, history };
+      }
+      return next;
+    });
+  }, [persist]);
+
   const removeLog = useCallback((date: string) => {
     persist(prev => {
       const next = { ...prev };
@@ -101,6 +131,7 @@ export function useDayLogs() {
     allLogs: logs,
     getLog,
     setLog,
+    mergeLogs,
     removeLog,
     clearAllLogs,
     todayLog,

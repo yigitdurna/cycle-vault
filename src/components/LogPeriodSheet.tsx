@@ -105,6 +105,16 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
     return [start, end];
   })();
 
+  // In 'end' mode the end date must fall between the cycle start and today —
+  // constrain the calendar so out-of-range days are dimmed, not silently ignored.
+  const isEndDateSelectable =
+    mode === 'end' && activeCycle
+      ? (date: Date) => {
+          const s = ymd(date);
+          return s >= activeCycle.start && s <= todayStr;
+        }
+      : undefined;
+
   const switchMode = (next: SheetMode) => {
     setMode(next);
     setStart(null);
@@ -234,6 +244,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                 selectable
                 selectedRange={selectedRange}
                 onSelectDate={handleSelectDate}
+                isDateSelectable={isEndDateSelectable}
               />
             </div>
 

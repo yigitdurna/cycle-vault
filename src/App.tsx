@@ -57,7 +57,7 @@ export default function App() {
     getPhaseForDate,
   } = useCycles(customCycleLength ?? 28, hideFertility);
 
-  const { allLogs, todayLog, setLog, clearAllLogs } = useDayLogs();
+  const { allLogs, todayLog, setLog, mergeLogs, clearAllLogs } = useDayLogs();
 
   // Keep on-device reminders in sync (no-op on web). "Yes, log it" on the
   // "did your period start?" notification starts a period on the predicted day.
@@ -250,11 +250,10 @@ export default function App() {
               onImportCSV={importCSV}
               onImportJSON={async (file) => {
                 const result = await importJSON(file);
-                // Merge imported dayLogs
+                // Non-destructively merge imported dayLogs (keeps existing days,
+                // folds in imported history) instead of dropping collisions.
                 if (Object.keys(result.dayLogs).length > 0) {
-                  for (const [date, log] of Object.entries(result.dayLogs)) {
-                    if (!allLogs[date]) setLog(date, log);
-                  }
+                  mergeLogs(result.dayLogs);
                 }
                 return result.cycles;
               }}

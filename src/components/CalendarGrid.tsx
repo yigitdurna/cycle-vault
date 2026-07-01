@@ -24,6 +24,10 @@ interface CalendarGridProps {
   selectable?: boolean;
   selectedRange?: [Date | null, Date | null];
   onSelectDate?: (date: Date) => void;
+  /** In selectable mode, restrict which days can be picked. Days for which this
+   *  returns false are dimmed and non-tappable (e.g. end-date must fall between
+   *  the cycle start and today). Omit to allow any in-month day. */
+  isDateSelectable?: (date: Date) => boolean;
   /** Symptom logs keyed by YYYY-MM-DD */
   dayLogs?: DayLogs;
   /** Called when a day is tapped (non-selectable mode) */
@@ -54,7 +58,7 @@ function getPhaseDot(phase: PhaseResult | null, hideFertility: boolean): string 
   }
 }
 
-export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSelectDate, dayLogs, onDayTap, hideFertility = false }: CalendarGridProps) {
+export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSelectDate, isDateSelectable, dayLogs, onDayTap, hideFertility = false }: CalendarGridProps) {
   const { t, locale } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const touchStartX = useRef(0);
@@ -145,25 +149,28 @@ export function CalendarGrid({ getPhaseForDate, selectable, selectedRange, onSel
           const inRange = isInRange(day);
           const hasSymptom = inMonth && dayLogs && dayLogHasData(dayLogs[dateStr]);
           const tappable = !selectable && onDayTap && inMonth;
+          // In selectable mode, a day is pickable unless a predicate rejects it.
+          const pickable = selectable && (!isDateSelectable || isDateSelectable(day));
 
           return (
             <button
               key={i}
               onClick={() => {
                 if (selectable) {
-                  onSelectDate?.(day);
+                  if (pickable) onSelectDate?.(day);
                 } else if (tappable) {
                   onDayTap(dateStr);
                 }
               }}
-              disabled={!selectable && !tappable}
+              disabled={selectable ? !pickable : !tappable}
               className={cn(
                 'aspect-square min-h-[42px] rounded-2xl flex flex-col items-center justify-center text-[15px] relative transition-colors',
                 !inMonth && 'opacity-30',
+                selectable && !pickable && 'opacity-30 cursor-not-allowed',
                 inMonth && !inRange && periodFill,
                 inRange && 'bg-ink/15 ring-1 ring-ink/30',
                 isToday && 'ring-2 ring-accent',
-                selectable && inMonth && 'hover:bg-ink/[0.06] cursor-pointer',
+                pickable && inMonth && 'hover:bg-ink/[0.06] cursor-pointer',
                 tappable && 'cursor-pointer active:bg-ink/[0.04]',
               )}
             >
