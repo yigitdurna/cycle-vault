@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { NotificationSettings } from '../types';
 import { DEFAULT_NOTIFICATION_SETTINGS } from '../types';
 import { detectLocale, isLocale, type Locale } from '../i18n';
+import { mirrorToDurable } from '../lib/durable-storage';
 
 const STORAGE_KEY = 'cycle-tracker-settings-v1';
 
@@ -30,7 +31,9 @@ export function useSettings() {
     const next = { ...settings, ...patch };
     setSettings(next);
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      const serialized = JSON.stringify(next);
+      localStorage.setItem(STORAGE_KEY, serialized);
+      mirrorToDurable(STORAGE_KEY, serialized);
     } catch (e) {
       console.warn('Failed to persist settings to localStorage', e);
     }

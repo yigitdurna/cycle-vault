@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import type { DayLog, DayLogs, SymptomSnapshot } from '../types';
 import { ymd } from '../lib/cycle-math';
+import { mirrorToDurable } from '../lib/durable-storage';
 
 const STORAGE_KEY = 'cycle-tracker-daylogs-v1';
 const NOTE_MAX_LENGTH = 500;
@@ -35,7 +36,9 @@ function loadLogs(): DayLogs {
 
 function saveLogs(logs: DayLogs) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    const serialized = JSON.stringify(logs);
+    localStorage.setItem(STORAGE_KEY, serialized);
+    mirrorToDurable(STORAGE_KEY, serialized);
   } catch (e) {
     console.warn('Failed to persist day logs to localStorage', e);
   }

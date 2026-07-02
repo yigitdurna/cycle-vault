@@ -161,8 +161,10 @@ describe('exportCSV neutralizes spreadsheet formula injection', () => {
     try {
       const { result } = renderHook(() => useCycles());
       act(() => { result.current.addCycle('2026-03-01', '2026-03-05'); });
-      act(() => {
-        result.current.exportCSV({ '2026-03-01': { date: '2026-03-01', note: '=SUM(A1:A9)' } });
+      // exportCSV is async (routes through exportFile, which awaits a dynamic
+      // import before building the web Blob); await the flush so blobs is set.
+      await act(async () => {
+        await result.current.exportCSV({ '2026-03-01': { date: '2026-03-01', note: '=SUM(A1:A9)' } });
       });
 
       const text = await blobs[0].text();
@@ -183,9 +185,9 @@ describe('exportCSV neutralizes spreadsheet formula injection', () => {
     try {
       const { result } = renderHook(() => useCycles());
       act(() => { result.current.addCycle('2026-03-01', '2026-03-05'); });
-      act(() => {
+      await act(async () => {
         // A malicious imported log could put a formula in a non-note field.
-        result.current.exportCSV({
+        await result.current.exportCSV({
           '2026-03-01': { date: '2026-03-01', mood: ['=cmd|"/c calc"!A1' as never] },
         });
       });

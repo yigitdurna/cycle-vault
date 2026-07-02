@@ -9,6 +9,8 @@ import {
   getCurrentCycleDay,
 } from '../lib/cycle-math';
 import { PHASES } from '../types';
+import { exportFile } from '../lib/export-file';
+import { mirrorToDurable } from '../lib/durable-storage';
 
 const STORAGE_KEY = 'cycle-tracker-calendar-v4';
 
@@ -91,7 +93,9 @@ function loadCycles(): Cycle[] {
 
 function saveCycles(cycles: Cycle[]) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cycles));
+    const serialized = JSON.stringify(cycles);
+    localStorage.setItem(STORAGE_KEY, serialized);
+    mirrorToDurable(STORAGE_KEY, serialized);
   } catch (e) {
     console.warn('Failed to persist cycles to localStorage', e);
   }
@@ -188,13 +192,11 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
 
   const exportJSON = useCallback((dayLogs?: DayLogs) => {
     const data = { cycles, ...(dayLogs && Object.keys(dayLogs).length > 0 ? { dayLogs } : {}) };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cycle-vault-backup.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    return exportFile(
+      'cycle-vault-backup.json',
+      JSON.stringify(data, null, 2),
+      'application/json',
+    );
   }, [cycles]);
 
   const exportCSV = useCallback((dayLogs: DayLogs = {}) => {
@@ -243,13 +245,7 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
       filename = 'cycle-vault-cycles.csv';
     }
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+    return exportFile(filename, csvContent, 'text/csv;charset=utf-8;');
   }, [cycles]);
 
   const importCSV = useCallback((file: File): Promise<number> => {
