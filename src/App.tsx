@@ -61,7 +61,13 @@ export default function App() {
 
   // Keep on-device reminders in sync (no-op on web). "Yes, log it" on the
   // "did your period start?" notification starts a period on the predicted day.
-  useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => addCycle(start, null), locale);
+  useNotifications(cycles, notifications, hideFertility, customCycleLength ?? 28, (start) => {
+    // "Yes, log it" on a "did your period start?" notification. Ignore it when a
+    // period is already being tracked — opening a second cycle would delete the
+    // current one (see useCycles.addCycle) and the prompt is stale anyway.
+    if (activeCycle) return;
+    addCycle(start, null);
+  }, locale);
 
   const { getPhaseDescription, todayInsights, insights, hasEnoughData } = useInsights(allLogs, cycles, todayLog, t, locale);
 

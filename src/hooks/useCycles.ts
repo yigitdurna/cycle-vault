@@ -120,7 +120,16 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
   // --- CRUD ---
 
   const addCycle = useCallback((start: string, end: string | null) => {
-    persist(prev => [...prev, { start, end }]);
+    persist(prev => {
+      // Data-loss guard: never open a second cycle while one is already active.
+      // Two open-ended (end: null) cycles both read as "ongoing forever", so
+      // sanitizeCycles sees them as overlapping and silently drops the earlier
+      // one — deleting a period the user already logged. The log sheet blocks
+      // starting a period while one is active, but the "did your period start?"
+      // notification action reaches addCycle directly, so guard it here too.
+      if (end === null && prev.some(c => c.end === null)) return prev;
+      return [...prev, { start, end }];
+    });
   }, [persist]);
 
   const updateCycle = useCallback((oldStart: string, newStart: string, newEnd: string | null) => {
