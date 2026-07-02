@@ -130,6 +130,9 @@ export default function App() {
   const handleRangeSelect = (date: string) => {
     if (!pendingStart) return;
     if (date < pendingStart) { setPendingStart(date); return; }
+    // The end date can't be in the future — the calendar dims future days, but
+    // guard here too (a future end would break day counts). Ignore the tap.
+    if (date > ymd(new Date())) return;
     addCycle(pendingStart, date);
     setPendingStart(null);
   };
@@ -289,6 +292,7 @@ export default function App() {
         open={logSheetOpen}
         editingCycle={editingCycle}
         activeCycle={activeCycle}
+        cycles={cycles}
         onSave={handleLogSave}
         onEndCycle={(end) => {
           endCycle(end);

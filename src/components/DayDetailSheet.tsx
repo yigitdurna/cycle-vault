@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Droplets, Moon, Zap, Frown, Pencil, Check, Play, Square } from 'lucide-react';
-import { nice } from '../lib/cycle-math';
+import { nice, ymd } from '../lib/cycle-math';
 import { SymptomPills } from './SymptomPills';
 import { useTranslation } from '../i18n';
 import type { Cycle, DayLog, MoodValue, Severity, SleepQuality, FlowLevel } from '../types';
@@ -85,8 +85,10 @@ export function DayDetailSheet({ open, date, log, phaseName, phaseColor, activeC
   );
 
   // Period actions for this date: start one if none is active, or end the
-  // active one on this day.
-  const canStartPeriod = !activeCycle && !dateInRecordedPeriod;
+  // active one on this day. Can't start a period on a future day — an "ongoing"
+  // period that starts in the future yields negative/zero day counts and the
+  // hook would reject it anyway.
+  const canStartPeriod = !activeCycle && !dateInRecordedPeriod && date <= ymd(new Date());
   const canEndPeriod = !!activeCycle && date >= activeCycle.start;
 
   return (

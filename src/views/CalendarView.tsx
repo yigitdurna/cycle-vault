@@ -109,6 +109,9 @@ export function CalendarView({
             selectable
             selectedRange={[fromYmd(selectionStart!), null]}
             onSelectDate={(d) => onRangeSelect(ymd(d))}
+            // The end date can't be in the future — dim/disable those days. An
+            // earlier tap (< start) is allowed: it re-anchors the start.
+            isDateSelectable={(d) => ymd(d) <= ymd(new Date())}
             hideFertility={hideFertility}
           />
         ) : (

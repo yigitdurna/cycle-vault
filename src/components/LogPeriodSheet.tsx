@@ -13,9 +13,24 @@ interface LogPeriodSheetProps {
   open: boolean;
   editingCycle: Cycle | null;
   activeCycle: Cycle | null;
+  /** All recorded cycles — used to dim/disable days that fall inside an
+   *  existing cycle so an interactive add/edit can't silently drop data. */
+  cycles: Cycle[];
   onSave: (start: string, end: string | null) => void;
   onEndCycle: (end: string) => void;
   onClose: () => void;
+}
+
+const FAR_FUTURE = '9999-12-31';
+
+/** True if the YYYY-MM-DD string falls inside the cycle (open cycles run to today→∞). */
+function dateInCycle(dateStr: string, c: Cycle): boolean {
+  return dateStr >= c.start && dateStr <= (c.end ?? FAR_FUTURE);
+}
+
+/** True if [aStart..aEnd] shares any day with the cycle (both YYYY-MM-DD strings). */
+function rangeOverlapsCycle(aStart: string, aEnd: string, c: Cycle): boolean {
+  return aStart <= (c.end ?? FAR_FUTURE) && c.start <= aEnd;
 }
 
 // Stub phase function for the log sheet calendar (no phase coloring needed)
@@ -35,7 +50,7 @@ const SAVE_KEYS: Record<SheetMode, string> = {
   edit: 'saveEdit',
 };
 
-export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndCycle, onClose }: LogPeriodSheetProps) {
+export function LogPeriodSheet({ open, editingCycle, activeCycle, cycles, onSave, onEndCycle, onClose }: LogPeriodSheetProps) {
   const { t, locale } = useTranslation();
   const [mode, setMode] = useState<SheetMode>('start');
   const [start, setStart] = useState<Date | null>(null);
@@ -93,10 +108,23 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
     }
   };
 
+  // Cycles that a new/edited range must not overlap. In 'edit' mode the cycle
+  // being edited is excluded (moving it onto its own days is fine).
+  const conflictCycles =
+    mode === 'edit' && editingCycle
+      ? cycles.filter(c => c.start !== editingCycle.start)
+      : cycles;
+
+  const rangeHasConflict = (a: string, b: string) =>
+    conflictCycles.some(c => rangeOverlapsCycle(a, b, c));
+
   const canSave =
-    (mode === 'start' && !!start) ||
+    // A 'start' save opens an open-ended cycle (start→∞), so it conflicts with
+    // ANY cycle ending on/after the picked day — not just cycles containing it.
+    (mode === 'start' && !!start && !rangeHasConflict(ymd(start), FAR_FUTURE)) ||
     (mode === 'end' && !!start) ||
-    ((mode === 'log' || mode === 'edit') && !!start && !!end);
+    ((mode === 'log' || mode === 'edit') && !!start && !!end &&
+      !rangeHasConflict(ymd(start), ymd(end)));
 
   // Build selectedRange for CalendarGrid
   const selectedRange: [Date | null, Date | null] = (() => {
@@ -105,15 +133,38 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
     return [start, end];
   })();
 
-  // In 'end' mode the end date must fall between the cycle start and today —
-  // constrain the calendar so out-of-range days are dimmed, not silently ignored.
-  const isEndDateSelectable =
-    mode === 'end' && activeCycle
-      ? (date: Date) => {
-          const s = ymd(date);
-          return s >= activeCycle.start && s <= todayStr;
-        }
-      : undefined;
+  // Constrain the calendar per mode so out-of-range days are dimmed + disabled
+  // rather than silently ignored (or worse, committed and then dropped):
+  //  - 'end':   [activeCycle.start … today].
+  //  - 'start': <= today AND after every existing cycle — the new cycle is
+  //             open-ended (start→∞), so any cycle ending on/after the day
+  //             would overlap it.
+  //  - 'log':   <= today AND not inside any existing cycle (incl. the active one,
+  //             which occupies start→today).
+  //  - 'edit':  <= today AND not inside any cycle other than the one being edited.
+  const isDateSelectable = (() => {
+    if (mode === 'end' && activeCycle) {
+      return (date: Date) => {
+        const s = ymd(date);
+        return s >= activeCycle.start && s <= todayStr;
+      };
+    }
+    if (mode === 'start') {
+      return (date: Date) => {
+        const s = ymd(date);
+        if (s > todayStr) return false;
+        return !rangeHasConflict(s, FAR_FUTURE);
+      };
+    }
+    if (mode === 'log' || mode === 'edit') {
+      return (date: Date) => {
+        const s = ymd(date);
+        if (s > todayStr) return false;
+        return !conflictCycles.some(c => dateInCycle(s, c));
+      };
+    }
+    return undefined;
+  })();
 
   const switchMode = (next: SheetMode) => {
     setMode(next);
@@ -244,7 +295,7 @@ export function LogPeriodSheet({ open, editingCycle, activeCycle, onSave, onEndC
                 selectable
                 selectedRange={selectedRange}
                 onSelectDate={handleSelectDate}
-                isDateSelectable={isEndDateSelectable}
+                isDateSelectable={isDateSelectable}
               />
             </div>
 

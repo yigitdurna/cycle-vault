@@ -189,6 +189,12 @@ export async function scheduleAllNotifications(
   if (pending.notifications.length) {
     await LocalNotifications.cancel({ notifications: pending.notifications.map(n => ({ id: n.id })) });
   }
+  // Also clear notifications iOS has ALREADY delivered to Notification Center —
+  // cancel() only removes still-pending ones. Otherwise a stale "did your period
+  // start?" prompt lingers and can be tapped a day later, opening a cycle that
+  // overlaps a period the user has since recorded (addCycle now refuses that,
+  // but the stale prompt shouldn't be there at all).
+  await LocalNotifications.removeAllDeliveredNotifications();
 
   if (!settings.enabled) return;
   const perm = await LocalNotifications.checkPermissions();

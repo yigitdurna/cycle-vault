@@ -121,21 +121,30 @@ export function useCycles(defaultCycleLength = 28, hideFertility = false) {
 
   const addCycle = useCallback((start: string, end: string | null) => {
     persist(prev => {
-      // Data-loss guard: never open a second cycle while one is already active.
-      // Two open-ended (end: null) cycles both read as "ongoing forever", so
-      // sanitizeCycles sees them as overlapping and silently drops the earlier
-      // one — deleting a period the user already logged. The log sheet blocks
-      // starting a period while one is active, but the "did your period start?"
-      // notification action reaches addCycle directly, so guard it here too.
-      if (end === null && prev.some(c => c.end === null)) return prev;
-      return [...prev, { start, end }];
+      // Data-loss guard: an interactive add must NEVER silently delete an
+      // existing cycle. sanitizeCycles resolves overlaps by "later start wins"
+      // and drops the loser — intentional for imports (which pre-compute their
+      // own merge and bypass addCycle via persist(() => precomputed)), but here
+      // it would discard a period the user already logged. Both directions bite:
+      // a new open cycle overlapping a closed one (stale "did your period start?"
+      // notification), and a logged range overlapping the active cycle. So refuse
+      // (no-op) whenever the incoming cycle overlaps ANY existing cycle, open or
+      // closed. UI paths dim conflicting days; this is the backstop.
+      const incoming: Cycle = { start, end };
+      if (prev.some(c => cyclesOverlap(c, incoming))) return prev;
+      return [...prev, incoming];
     });
   }, [persist]);
 
   const updateCycle = useCallback((oldStart: string, newStart: string, newEnd: string | null) => {
-    persist(prev => prev.map(c =>
-      c.start === oldStart ? { start: newStart, end: newEnd } : c
-    ));
+    persist(prev => {
+      // Same non-destructive rule as addCycle: refuse the edit if the new range
+      // would overlap any cycle OTHER than the one being edited (matched by
+      // oldStart), which sanitizeCycles would otherwise silently drop.
+      const incoming: Cycle = { start: newStart, end: newEnd };
+      if (prev.some(c => c.start !== oldStart && cyclesOverlap(c, incoming))) return prev;
+      return prev.map(c => c.start === oldStart ? incoming : c);
+    });
   }, [persist]);
 
   const deleteCycle = useCallback((start: string) => {
