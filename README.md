@@ -11,9 +11,9 @@ A privacy-focused menstrual cycle tracking PWA built with React, TypeScript, and
 - **Daily Symptom Logging**: Track mood, flow, energy, cramps, pain, and sleep. Notes are timestamped and appended, not overwritten.
 - **Personalized Insights**: Pattern recognition surfaces recurring symptoms by phase after enough cycles are logged.
 - **Interactive Calendar**: Phase-colored day grid with swipe navigation and per-day symptom logging.
-- **Privacy First**: All data stored locally in `localStorage`. No network requests, no analytics.
-- **Data Portability**: JSON (full backup including symptoms) and CSV export/import.
-- **PWA**: Installable on iOS and Android, works fully offline.
+- **Privacy First**: All data stored locally on your device. No accounts, no network requests, no analytics.
+- **Data Portability**: JSON (full backup including symptoms) and CSV export/import. On iOS, export opens the native share sheet (save to Files, AirDrop, etc.).
+- **PWA + native iOS**: Installable as a PWA on iOS and Android, works fully offline. Also ships as a Capacitor iOS app (TestFlight) with local notifications and a durable native storage mirror that survives web-storage purges.
 
 ## Tech Stack
 
@@ -24,6 +24,7 @@ A privacy-focused menstrual cycle tracking PWA built with React, TypeScript, and
 - Lucide React (icons)
 - date-fns (calendar math)
 - Vitest (unit tests)
+- Capacitor 8 (native iOS wrapper: filesystem, share, preferences, local-notifications)
 
 ## Development
 
@@ -40,9 +41,12 @@ npm run lint      # type check
 ```
 src/
 ├── lib/
-│   ├── cycle-math.ts   # pure prediction engine (fully unit-tested)
-│   ├── insights.ts     # pattern analysis from symptom logs
-│   └── __tests__/      # Vitest test suites
+│   ├── cycle-math.ts       # pure prediction engine (fully unit-tested)
+│   ├── insights.ts         # pattern analysis from symptom logs
+│   ├── notifications.ts    # on-device reminder planning (pure) + native scheduling
+│   ├── export-file.ts      # backup export: browser download (web) / share sheet (iOS)
+│   ├── durable-storage.ts  # native mirror of localStorage (survives iOS purges)
+│   └── __tests__/          # Vitest test suites
 ├── hooks/
 │   ├── useCycles.ts    # cycle CRUD + localStorage persistence
 │   ├── useDayLogs.ts   # symptom log persistence with history snapshots

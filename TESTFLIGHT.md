@@ -10,6 +10,20 @@ A complete, ordered runbook for wrapping the existing **cycle vault** Vite/React
 > - Display name: **cycle vault** (always lowercase, user-facing).
 > - Monetization: **paid upfront, $3.99 one-time**. Price is set in App Store Connect via the price point. **No StoreKit / IAP code is required at all.**
 
+> ✅ **AS BUILT (updated 2026-07-02).** The app IS on TestFlight — builds 1–6 uploaded; this document was
+> the original plan and parts of it drifted from reality. What's actually true now:
+> - **SPM, not CocoaPods** — the ios/ project uses Swift Package Manager; skip every `pod` step.
+> - **Plugins actually installed:** app, filesystem, local-notifications, preferences, share.
+>   (status-bar / splash-screen / haptics / biometric-auth were never added.)
+> - **Everyday ship loop is fully CLI, no Xcode GUI** — see the "iOS / TestFlight" section of CLAUDE.md:
+>   `npm run build:ios && npx cap sync ios`, bump `CURRENT_PROJECT_VERSION` in project.pbxproj,
+>   `xcodebuild … archive` then `xcodebuild -exportArchive` (method app-store-connect, destination upload),
+>   both with `GIT_CONFIG_GLOBAL=/dev/null` (a global SSH-insteadOf git rule breaks SPM clones otherwise).
+> - **Export compliance** is declared in Info.plist (`ITSAppUsesNonExemptEncryption=NO`) — no per-build prompt.
+> - **Build history:** 1–3 initial internal-testing builds · 4 period data-loss fix (notification opening a
+>   second open cycle) · 5 broadened overlap guards + stale-notification cleanup · 6 working export via
+>   share sheet + durable Preferences storage mirror (export confirmed working on device).
+
 > ⚠️ **Version-sensitive note (verified June 2026):** Capacitor stable is **8.x** (`@capacitor/core@8.4.0`).
 > Capacitor 8 **requires Node 22+ and Xcode 26.0+**. Capacitor 9 is in alpha — do **not** use it for a store
 > submission. Pin to `^8`. Re-check `npm view @capacitor/core version` before you start, and confirm the Xcode

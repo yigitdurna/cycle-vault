@@ -217,7 +217,11 @@ documented by Capacitor). Mitigations, all applied:
 
 ### 3.4 Reschedule triggers
 
-Always **cancel-all then re-add** (no diffing). Trigger a full `scheduleAllNotifications`:
+Always **cancel-all then re-add** (no diffing). Note `cancel()` only removes *pending*
+notifications — ones iOS has already **delivered** stay tappable in Notification Center
+(this let a stale "did your period start?" prompt be tapped a day after the user logged
+the period). So the cancel step also calls `removeAllDeliveredNotifications()`.
+Trigger a full `scheduleAllNotifications`:
 
 1. **Settings change** — any toggle, `reminderTime`, `leadDays`, `endReminderDay`, or
    `hideFertility`.
